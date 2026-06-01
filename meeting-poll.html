@@ -3,247 +3,369 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>회의 일정 조율</title>
+<title>FNL-PRAISE · 회의 일정 조율</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
-  :root {
-    --primary: #4f46e5;
-    --primary-light: #eef2ff;
-    --success: #10b981;
-    --danger: #ef4444;
-    --gray-50: #f9fafb;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --gray-400: #9ca3af;
-    --gray-600: #4b5563;
-    --gray-800: #1f2937;
-    --radius: 10px;
-    --shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
-    --shadow-md: 0 4px 6px -1px rgba(0,0,0,.1);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--gray-50);
-    color: var(--gray-800);
-    min-height: 100vh;
-  }
-  .top-bar {
-    background: white;
-    border-bottom: 1px solid var(--gray-200);
-    padding: 14px 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    box-shadow: var(--shadow);
-  }
-  .top-bar h1 { font-size: 17px; font-weight: 700; color: var(--primary); }
-  .top-bar .back-btn {
-    background: none; border: none; cursor: pointer;
-    color: var(--gray-600); font-size: 18px; padding: 2px 6px;
-    border-radius: 6px;
-  }
-  .top-bar .back-btn:hover { background: var(--gray-100); }
-  .spacer { flex: 1; }
-  .container { max-width: 720px; margin: 0 auto; padding: 24px 16px; }
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap');
 
-  /* Cards */
-  .card {
-    background: white;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 20px;
-    margin-bottom: 16px;
-  }
-  .card h2 { font-size: 15px; font-weight: 600; margin-bottom: 14px; color: var(--gray-600); text-transform: uppercase; letter-spacing: .05em; }
+:root {
+  --p1: #6b45b8;
+  --p2: #9b7dd4;
+  --p3: #c4aef0;
+  --p-light: #f4f0ff;
+  --green: #4aaa84;
+  --green-light: #e8f7f2;
+  --red-light: #fdf0f0;
+  --red: #d96b6b;
+  --bg: #f7f5f2;
+  --card: #ffffff;
+  --border: #ede8e0;
+  --border2: #d8d0c8;
+  --txt: #2d2820;
+  --txt2: #7a6f66;
+  --txt3: #b0a89e;
+  --r: 20px;
+  --r2: 12px;
+  --sh: 0 4px 20px rgba(80,50,30,.08);
+  --sh2: 0 8px 32px rgba(80,50,30,.14);
+}
 
-  /* Buttons */
-  .btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 9px 18px; border-radius: 8px; border: none;
-    font-size: 14px; font-weight: 600; cursor: pointer;
-    transition: all .15s;
-  }
-  .btn-primary { background: var(--primary); color: white; }
-  .btn-primary:hover { background: #4338ca; }
-  .btn-secondary { background: var(--gray-100); color: var(--gray-800); }
-  .btn-secondary:hover { background: var(--gray-200); }
-  .btn-danger { background: var(--danger); color: white; }
-  .btn-success { background: var(--success); color: white; }
-  .btn-outline {
-    background: white; color: var(--primary);
-    border: 1.5px solid var(--primary);
-  }
-  .btn-outline:hover { background: var(--primary-light); }
-  .btn-sm { padding: 6px 12px; font-size: 13px; }
-  .btn-full { width: 100%; justify-content: center; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* Forms */
-  .form-group { margin-bottom: 16px; }
-  label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-600); margin-bottom: 6px; }
-  input[type=text], input[type=date], textarea, select {
-    width: 100%; padding: 9px 12px; border: 1.5px solid var(--gray-200);
-    border-radius: 8px; font-size: 14px; transition: border .15s;
-    outline: none; background: white;
-  }
-  input:focus, textarea:focus, select:focus { border-color: var(--primary); }
-  textarea { resize: vertical; min-height: 80px; }
-  .input-row { display: flex; gap: 8px; }
-  .input-row input { flex: 1; }
+body {
+  font-family: 'Noto Sans KR', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--txt);
+  min-height: 100vh;
+}
 
-  /* Tags / chips */
-  .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-  .tag {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: var(--primary-light); color: var(--primary);
-    border-radius: 20px; padding: 4px 12px; font-size: 13px; font-weight: 500;
-  }
-  .tag .remove {
-    cursor: pointer; opacity: .6; font-size: 15px;
-    border: none; background: none; color: inherit; padding: 0;
-  }
-  .tag .remove:hover { opacity: 1; }
+/* ── Loading ── */
+#loading {
+  position: fixed; inset: 0; background: rgba(247,245,242,.92);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px; z-index: 200; font-size: 14px; color: var(--txt2);
+}
+.spinner {
+  width: 28px; height: 28px;
+  border: 3px solid var(--border2); border-top-color: var(--p1);
+  border-radius: 50%; animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Meeting list */
-  .meeting-item {
-    display: flex; align-items: center; gap: 14px;
-    padding: 14px 16px; background: white; border-radius: var(--radius);
-    box-shadow: var(--shadow); margin-bottom: 10px;
-    cursor: pointer; transition: box-shadow .15s;
-    border: 1.5px solid transparent;
-  }
-  .meeting-item:hover { box-shadow: var(--shadow-md); border-color: var(--primary); }
-  .meeting-item .icon {
-    width: 40px; height: 40px; border-radius: 10px;
-    background: var(--primary-light); color: var(--primary);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; flex-shrink: 0;
-  }
-  .meeting-item .info { flex: 1; min-width: 0; }
-  .meeting-item .title { font-weight: 600; font-size: 15px; }
-  .meeting-item .meta { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
-  .meeting-item .arrow { color: var(--gray-400); font-size: 18px; }
+/* ── Hero Header ── */
+.hero {
+  background: linear-gradient(145deg, #4e2e98 0%, #7c5cbf 50%, #a87ee0 100%);
+  padding: 28px 20px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 70% 20%, rgba(255,255,255,.12) 0%, transparent 60%),
+              radial-gradient(ellipse at 20% 80%, rgba(255,255,255,.08) 0%, transparent 50%);
+}
+.hero-inner { position: relative; z-index: 1; }
 
-  /* Summary grid */
-  .grid-wrap { overflow-x: auto; }
-  table.grid { border-collapse: collapse; min-width: 100%; font-size: 13px; }
-  table.grid th, table.grid td {
-    padding: 10px 14px; border: 1px solid var(--gray-200);
-    text-align: center; white-space: nowrap;
-  }
-  table.grid th { background: var(--gray-50); font-weight: 600; color: var(--gray-600); }
-  table.grid td:first-child { text-align: left; font-weight: 500; }
-  .cell-yes { background: #d1fae5; color: #065f46; font-weight: 700; }
-  .cell-no { background: #fee2e2; color: #991b1b; }
-  .cell-pending { color: var(--gray-400); }
-  .count-row td { background: var(--gray-50); font-weight: 700; color: var(--primary); }
+/* Logo badge */
+.logo-badge {
+  display: inline-flex; flex-direction: column; align-items: center;
+  background: rgba(255,255,255,.15); backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 16px; padding: 10px 24px; margin-bottom: 14px;
+}
+.logo-fnl {
+  font-size: 11px; font-weight: 900; letter-spacing: 4px;
+  color: rgba(255,255,255,.7); line-height: 1;
+}
+.logo-praise {
+  font-size: 20px; font-weight: 900; letter-spacing: 2px;
+  color: #ffffff; line-height: 1.2;
+}
 
-  /* Date option selector */
-  .date-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-  .date-option {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 16px; border-radius: 10px; border: 2px solid var(--gray-200);
-    cursor: pointer; transition: all .15s; background: white;
-  }
-  .date-option:hover { border-color: var(--primary); background: var(--primary-light); }
-  .date-option.selected { border-color: var(--success); background: #d1fae5; }
-  .date-option .check {
-    width: 24px; height: 24px; border-radius: 50%;
-    border: 2px solid var(--gray-200); display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; transition: all .15s;
-  }
-  .date-option.selected .check { background: var(--success); border-color: var(--success); color: white; }
-  .date-option .date-label { font-weight: 500; font-size: 14px; }
+.hero-title {
+  font-size: 22px; font-weight: 700; color: white;
+  margin-bottom: 6px; line-height: 1.4;
+}
+.hero-subtitle {
+  font-size: 13px; color: rgba(255,255,255,.72); line-height: 1.6;
+}
+.hero-back {
+  position: absolute; left: 16px; top: 20px; z-index: 2;
+  background: rgba(255,255,255,.2); border: none; color: white;
+  font-size: 20px; width: 36px; height: 36px; border-radius: 10px;
+  cursor: pointer; display: none; align-items: center; justify-content: center;
+  transition: background .15s;
+}
+.hero-back:hover { background: rgba(255,255,255,.3); }
+.hero-settings {
+  position: absolute; right: 16px; top: 20px; z-index: 2;
+  background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.3);
+  color: white; font-size: 15px; padding: 6px 12px; border-radius: 10px;
+  cursor: pointer; transition: background .15s;
+}
+.hero-settings:hover { background: rgba(255,255,255,.3); }
 
-  /* Name selector */
-  .name-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
-  .name-btn {
-    padding: 10px; border-radius: 8px; border: 2px solid var(--gray-200);
-    background: white; cursor: pointer; font-size: 14px; font-weight: 500;
-    transition: all .15s; text-align: center;
-  }
-  .name-btn:hover { border-color: var(--primary); color: var(--primary); }
-  .name-btn.selected { border-color: var(--primary); background: var(--primary); color: white; }
+/* Floating card overlap */
+.content-wrap {
+  max-width: 680px; margin: -24px auto 0;
+  padding: 0 16px 60px; position: relative; z-index: 2;
+}
 
-  /* Status badges */
-  .badge {
-    display: inline-block; padding: 2px 8px; border-radius: 20px;
-    font-size: 11px; font-weight: 600;
-  }
-  .badge-open { background: #d1fae5; color: #065f46; }
-  .badge-closed { background: var(--gray-100); color: var(--gray-600); }
+/* ── Cards ── */
+.card {
+  background: var(--card); border-radius: var(--r);
+  box-shadow: var(--sh); padding: 24px;
+  margin-bottom: 16px; border: 1px solid var(--border);
+}
 
-  /* Setup screen */
-  .setup-hero {
-    text-align: center; padding: 40px 20px 24px;
-  }
-  .setup-hero .emoji { font-size: 52px; margin-bottom: 12px; }
-  .setup-hero h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-  .setup-hero p { color: var(--gray-600); font-size: 14px; line-height: 1.6; }
-  .steps { counter-reset: step; }
-  .step { display: flex; gap: 14px; margin-bottom: 12px; }
-  .step-num {
-    width: 28px; height: 28px; border-radius: 50%; background: var(--primary);
-    color: white; font-size: 13px; font-weight: 700;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
-  }
-  .step-text { font-size: 14px; line-height: 1.6; color: var(--gray-800); }
-  .step-text a { color: var(--primary); }
-  .alert { padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
-  .alert-info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
-  .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
-  .alert-warn { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
+/* Step header */
+.step-head {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
+}
+.step-num-badge {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--p1), var(--p2));
+  color: white; font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; box-shadow: 0 3px 10px rgba(107,69,184,.35);
+}
+.step-title { font-size: 16px; font-weight: 700; color: var(--txt); }
+.step-sub { font-size: 12px; color: var(--txt3); margin-top: 1px; }
 
-  /* Share box */
-  .share-box {
-    background: var(--gray-50); border: 1.5px solid var(--gray-200);
-    border-radius: 8px; padding: 10px 14px;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .share-box .url { flex: 1; font-size: 12px; color: var(--gray-600); word-break: break-all; }
-  .share-box .copy-btn {
-    flex-shrink: 0; background: var(--primary); color: white;
-    border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px;
-    cursor: pointer; font-weight: 600;
-  }
-  .share-box .copy-btn:hover { background: #4338ca; }
+/* ── Meeting list ── */
+.meeting-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 18px; background: var(--card); border-radius: var(--r2);
+  box-shadow: var(--sh); margin-bottom: 12px;
+  cursor: pointer; transition: all .2s;
+  border: 1.5px solid var(--border);
+}
+.meeting-item:hover { box-shadow: var(--sh2); border-color: var(--p3); transform: translateY(-2px); }
+.meet-icon {
+  width: 48px; height: 48px; border-radius: 14px;
+  background: linear-gradient(135deg, var(--p1), var(--p2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0; box-shadow: 0 4px 12px rgba(107,69,184,.3);
+}
+.meet-info { flex: 1; min-width: 0; }
+.meet-title { font-weight: 700; font-size: 15px; color: var(--txt); }
+.meet-meta { font-size: 12px; color: var(--txt3); margin-top: 4px; }
+.meet-arrow { color: var(--p3); font-size: 22px; }
 
-  /* Spinner */
-  .spinner {
-    display: inline-block; width: 20px; height: 20px;
-    border: 2px solid var(--gray-200); border-top-color: var(--primary);
-    border-radius: 50%; animation: spin .7s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* ── Name buttons ── */
+.name-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+.name-btn {
+  padding: 13px 10px; border-radius: var(--r2);
+  border: 2px solid var(--border);
+  background: var(--bg); cursor: pointer;
+  font-size: 14px; font-weight: 600; color: var(--txt);
+  transition: all .2s; text-align: center;
+  font-family: inherit;
+}
+.name-btn:hover { border-color: var(--p3); color: var(--p1); background: var(--p-light); transform: translateY(-1px); box-shadow: var(--sh); }
+.name-btn.selected {
+  border-color: var(--p1);
+  background: linear-gradient(135deg, var(--p1), var(--p2));
+  color: white; box-shadow: 0 5px 16px rgba(107,69,184,.35);
+  transform: translateY(-2px);
+}
 
-  /* Loading overlay */
-  #loading {
-    position: fixed; inset: 0; background: rgba(255,255,255,.85);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 12px; z-index: 100; font-size: 14px; color: var(--gray-600);
-  }
+/* ── Date cards ── */
+.date-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.date-card {
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 18px; border-radius: var(--r2);
+  border: 2px solid var(--border); background: var(--bg);
+  cursor: pointer; transition: all .2s;
+}
+.date-card:hover { border-color: var(--p3); background: var(--p-light); }
+.date-card.selected { border-color: var(--green); background: var(--green-light); }
 
-  /* Section toggle */
-  .section-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .section-header h2 { font-size: 16px; font-weight: 700; }
+.date-cal {
+  width: 52px; flex-shrink: 0; border-radius: 10px;
+  overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.1);
+}
+.date-cal-top {
+  background: linear-gradient(135deg, var(--p1), var(--p2));
+  color: white; font-size: 9px; font-weight: 700;
+  text-align: center; padding: 4px 2px; letter-spacing: .5px;
+}
+.date-card.selected .date-cal-top { background: linear-gradient(135deg, #3a8a6a, var(--green)); }
+.date-cal-num {
+  background: white; color: var(--txt);
+  font-size: 22px; font-weight: 900;
+  text-align: center; padding: 4px 2px 6px;
+  line-height: 1;
+}
+.date-card.selected .date-cal-num { color: #2a6a50; }
 
-  /* My response indicator */
-  .my-row td:first-child { font-weight: 700; color: var(--primary); }
-  .my-row td:first-child::after { content: ' (나)'; font-size: 11px; opacity: .7; }
+.date-info { flex: 1; }
+.date-main { font-size: 14px; font-weight: 700; color: var(--txt); }
+.date-time { font-size: 12px; color: var(--txt3); margin-top: 2px; }
+.date-check {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 2px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; flex-shrink: 0; transition: all .2s; color: transparent;
+}
+.date-card.selected .date-check { background: var(--green); border-color: var(--green); color: white; }
 
-  /* Responsive */
-  @media(max-width: 480px) {
-    .container { padding: 16px 12px; }
-    .card { padding: 16px; }
-    .name-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
-  }
+/* ── Summary table ── */
+.grid-wrap { overflow-x: auto; border-radius: var(--r2); }
+table.grid { border-collapse: collapse; min-width: 100%; font-size: 13px; }
+table.grid th, table.grid td {
+  padding: 11px 14px; border: 1px solid var(--border);
+  text-align: center; white-space: nowrap;
+}
+table.grid th {
+  background: var(--bg); font-weight: 700;
+  color: var(--txt2); font-size: 12px; letter-spacing: .02em;
+}
+table.grid td:first-child { text-align: left; font-weight: 600; }
+.cell-yes { background: var(--green-light); color: #2a6a50; font-weight: 700; font-size: 16px; }
+.cell-no { background: var(--red-light); color: var(--red); }
+.cell-pending { color: var(--txt3); }
+.count-row td {
+  background: var(--p-light); font-weight: 700;
+  color: var(--p1); border-top: 2px solid var(--p3);
+}
+.my-row td:first-child { color: var(--p1); }
+.my-row td:first-child::after { content: ' ★'; font-size: 11px; }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 12px 24px; border-radius: 50px; border: none;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  transition: all .2s; font-family: inherit;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--p1), var(--p2));
+  color: white; box-shadow: 0 4px 14px rgba(107,69,184,.35);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(107,69,184,.45); }
+.btn-success {
+  background: linear-gradient(135deg, #3a8a6a, var(--green));
+  color: white; box-shadow: 0 4px 14px rgba(74,170,132,.35);
+}
+.btn-success:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(74,170,132,.45); }
+.btn-secondary {
+  background: var(--bg); color: var(--txt2);
+  border: 1.5px solid var(--border2);
+}
+.btn-secondary:hover { background: var(--border); }
+.btn-danger { background: var(--red); color: white; }
+.btn-outline {
+  background: white; color: var(--p1);
+  border: 1.5px solid var(--p3);
+}
+.btn-outline:hover { background: var(--p-light); }
+.btn-sm { padding: 7px 16px; font-size: 13px; }
+.btn-full { width: 100%; }
+
+/* ── Forms ── */
+.form-group { margin-bottom: 16px; }
+label { display: block; font-size: 13px; font-weight: 600; color: var(--txt2); margin-bottom: 6px; }
+input[type=text], input[type=date], textarea {
+  width: 100%; padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r2); font-size: 14px;
+  outline: none; background: var(--bg);
+  color: var(--txt); transition: all .15s;
+  font-family: inherit;
+}
+input:focus, textarea:focus { border-color: var(--p2); background: white; }
+textarea { resize: vertical; min-height: 80px; }
+.input-row { display: flex; gap: 8px; }
+.input-row input { flex: 1; }
+
+/* ── Tags ── */
+.tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--p-light); color: var(--p1);
+  border: 1px solid var(--p3);
+  border-radius: 20px; padding: 5px 14px;
+  font-size: 13px; font-weight: 500;
+}
+.tag .remove {
+  cursor: pointer; opacity: .6; font-size: 15px;
+  border: none; background: none; color: inherit; padding: 0;
+}
+.tag .remove:hover { opacity: 1; }
+
+/* ── Share box ── */
+.share-box {
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--r2); padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.share-box .url { flex: 1; font-size: 12px; color: var(--txt2); word-break: break-all; }
+.copy-btn {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--p1), var(--p2));
+  color: white; border: none; border-radius: 20px;
+  padding: 7px 16px; font-size: 12px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  box-shadow: 0 3px 10px rgba(107,69,184,.3);
+}
+.copy-btn:hover { opacity: .9; }
+
+/* ── Alerts ── */
+.alert { padding: 12px 16px; border-radius: var(--r2); font-size: 13px; margin-bottom: 16px; line-height: 1.6; }
+.alert-info { background: var(--p-light); color: #4a2d90; border: 1px solid var(--p3); }
+.alert-warn { background: #fff8ec; color: #8a6020; border: 1px solid #f5d898; }
+
+/* ── Setup ── */
+.setup-hero { text-align: center; padding: 32px 16px 20px; }
+.setup-hero .emoji { font-size: 48px; margin-bottom: 10px; }
+.setup-hero h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.setup-hero p { font-size: 13px; color: var(--txt2); line-height: 1.6; }
+.step-row { display: flex; gap: 14px; margin-bottom: 12px; align-items: flex-start; }
+.step-dot {
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--p1), var(--p2));
+  color: white; font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; margin-top: 1px;
+}
+.step-row p { font-size: 14px; line-height: 1.6; color: var(--txt); }
+.step-row a { color: var(--p1); }
+
+/* ── Home header ── */
+.list-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.list-header h2 { font-size: 18px; font-weight: 700; }
+
+/* ── Empty ── */
+.empty {
+  text-align: center; padding: 40px 20px;
+  color: var(--txt3); font-size: 14px; line-height: 1.8;
+}
+.empty .big { font-size: 40px; margin-bottom: 10px; }
+
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+  background: var(--txt); color: white;
+  padding: 11px 22px; border-radius: 30px;
+  font-size: 13px; font-weight: 500;
+  box-shadow: var(--sh2); z-index: 300;
+  animation: toastIn .25s ease;
+}
+@keyframes toastIn { from { opacity:0; transform: translateX(-50%) translateY(10px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
+
+@media(max-width:480px) {
+  .hero { padding: 24px 16px 44px; }
+  .content-wrap { padding: 0 12px 50px; }
+  .card { padding: 18px; }
+  .name-grid { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+  .hero-title { font-size: 18px; }
+}
 </style>
 </head>
 <body>
@@ -253,388 +375,238 @@
   <span>불러오는 중...</span>
 </div>
 
-<!-- TOP BAR -->
-<div class="top-bar">
-  <button class="back-btn" id="backBtn" onclick="goBack()" style="display:none">←</button>
-  <h1 id="topTitle">📅 회의 일정 조율</h1>
-  <div class="spacer"></div>
-  <button class="btn btn-sm btn-outline" id="settingsBtn" onclick="showSetup()" title="Firebase 설정">⚙</button>
+<!-- HERO -->
+<div class="hero" id="hero">
+  <button class="hero-back" id="backBtn" onclick="goBack()">←</button>
+  <button class="hero-settings" id="settingsBtn" onclick="showSetup()">⚙</button>
+  <div class="hero-inner">
+    <div class="logo-badge">
+      <span class="logo-fnl">FNL</span>
+      <span class="logo-praise">PRAISE</span>
+    </div>
+    <div class="hero-title" id="heroTitle">금요일작은찬양팀 정기모임</div>
+    <div class="hero-subtitle" id="heroSub">✦ 일상과 기도제목 나누기<br>✦ 찬양팀 운영, 연습, 선곡 및 예배 형식 관련 논의</div>
+  </div>
 </div>
 
-<!-- MAIN CONTENT AREA -->
-<div id="app"></div>
+<div class="content-wrap">
+  <div id="app"></div>
+</div>
 
 <script>
-// ─── State ───────────────────────────────────────────────────
 let db = null;
 let currentView = null;
 let currentMeetingId = null;
 let currentUser = null;
 
-// ─── Firebase init ────────────────────────────────────────────
+// ── Firebase ──────────────────────────────────────────────────
 function initFirebase(config) {
   if (firebase.apps.length) {
     firebase.app().delete().then(() => _initFB(config));
-  } else {
-    _initFB(config);
-  }
+  } else { _initFB(config); }
 }
-
 function _initFB(config) {
   try {
     firebase.initializeApp(config);
     db = firebase.database();
     localStorage.setItem('fbConfig', JSON.stringify(config));
-    hideLoading();
-    routeFromHash();
-  } catch(e) {
-    hideLoading();
-    alert('Firebase 초기화 실패: ' + e.message);
-  }
+    hideLoading(); routeFromHash();
+  } catch(e) { hideLoading(); alert('Firebase 오류: ' + e.message); }
 }
 
-// ─── Routing ──────────────────────────────────────────────────
+// ── Routing ───────────────────────────────────────────────────
 window.addEventListener('hashchange', routeFromHash);
-
 function routeFromHash() {
-  const hash = location.hash;
-  if (hash.startsWith('#meeting/')) {
-    const id = hash.slice(9);
-    showMeeting(id);
-  } else if (hash === '#create') {
-    showCreate();
-  } else if (hash === '#setup') {
-    showSetupView();
-  } else {
-    showHome();
-  }
+  const h = location.hash;
+  if (h.startsWith('#meeting/')) showMeeting(h.slice(9));
+  else if (h === '#create') showCreate();
+  else if (h === '#setup') showSetupView();
+  else showHome();
 }
+function goBack() { location.hash = '#'; }
 
-function goBack() {
-  if (currentView === 'meeting') { location.hash = '#'; }
-  else if (currentView === 'create') { location.hash = '#'; }
-  else { location.hash = '#'; }
-}
-
-// ─── Loading ──────────────────────────────────────────────────
+// ── Loading ───────────────────────────────────────────────────
 function showLoading(msg) {
   document.getElementById('loading').style.display = 'flex';
   document.querySelector('#loading span').textContent = msg || '불러오는 중...';
 }
-function hideLoading() {
-  document.getElementById('loading').style.display = 'none';
+function hideLoading() { document.getElementById('loading').style.display = 'none'; }
+
+// ── Hero helpers ──────────────────────────────────────────────
+function setHero(title, sub, back) {
+  document.getElementById('heroTitle').textContent = title;
+  document.getElementById('heroSub').innerHTML = sub || '';
+  document.getElementById('backBtn').style.display = back ? 'flex' : 'none';
 }
+function setHeroHTML(title, sub, back) { setHero(title, sub, back); }
 
-// ─── Setup View ───────────────────────────────────────────────
+// ── Setup ─────────────────────────────────────────────────────
 function showSetup() { location.hash = '#setup'; }
-
 function showSetupView() {
   currentView = 'setup';
-  document.getElementById('backBtn').style.display = db ? '' : 'none';
-  document.getElementById('topTitle').textContent = '⚙ Firebase 설정';
-
+  setHero('Firebase 설정', '데이터 연결 구성', !!db);
   const saved = JSON.parse(localStorage.getItem('fbConfig') || '{}');
-
   render(`
-    <div class="container">
-      <div class="setup-hero">
-        <div class="emoji">🔥</div>
-        <h2>Firebase 연결 설정</h2>
-        <p>데이터를 실시간으로 공유하려면<br>무료 Firebase 프로젝트가 필요합니다.</p>
-      </div>
-
-      <div class="card">
-        <h2>처음 설정하는 방법</h2>
-        <div class="steps">
-          <div class="step">
-            <div class="step-num">1</div>
-            <div class="step-text"><a href="https://console.firebase.google.com" target="_blank">Firebase Console</a>에서 새 프로젝트 생성</div>
-          </div>
-          <div class="step">
-            <div class="step-num">2</div>
-            <div class="step-text">프로젝트 → <b>Realtime Database</b> → 데이터베이스 만들기 (테스트 모드)</div>
-          </div>
-          <div class="step">
-            <div class="step-num">3</div>
-            <div class="step-text">프로젝트 설정(⚙) → 앱 추가(</>) → 웹 앱 등록 후 설정값 복사</div>
-          </div>
-          <div class="step">
-            <div class="step-num">4</div>
-            <div class="step-text">아래 양식에 붙여넣고 저장</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Firebase 설정값 입력</h2>
-        <div class="alert alert-info">
-          Firebase 콘솔 → 프로젝트 설정 → 내 앱 → SDK 설정 및 구성에서 복사하세요.
-        </div>
-        <div class="form-group">
-          <label>API Key</label>
-          <input type="text" id="fb_apiKey" placeholder="AIzaSy..." value="${saved.apiKey||''}">
-        </div>
-        <div class="form-group">
-          <label>Auth Domain</label>
-          <input type="text" id="fb_authDomain" placeholder="your-app.firebaseapp.com" value="${saved.authDomain||''}">
-        </div>
-        <div class="form-group">
-          <label>Database URL</label>
-          <input type="text" id="fb_databaseURL" placeholder="https://your-app-default-rtdb.firebaseio.com" value="${saved.databaseURL||''}">
-        </div>
-        <div class="form-group">
-          <label>Project ID</label>
-          <input type="text" id="fb_projectId" placeholder="your-app-12345" value="${saved.projectId||''}">
-        </div>
-        <div class="form-group">
-          <label>Storage Bucket</label>
-          <input type="text" id="fb_storageBucket" placeholder="your-app.appspot.com" value="${saved.storageBucket||''}">
-        </div>
-        <div class="form-group">
-          <label>Messaging Sender ID</label>
-          <input type="text" id="fb_messagingSenderId" placeholder="123456789" value="${saved.messagingSenderId||''}">
-        </div>
-        <div class="form-group">
-          <label>App ID</label>
-          <input type="text" id="fb_appId" placeholder="1:123:web:abc" value="${saved.appId||''}">
-        </div>
-        <button class="btn btn-primary btn-full" onclick="saveFirebaseConfig()">저장하고 연결</button>
-      </div>
+    <div class="setup-hero">
+      <div class="emoji">🔥</div>
+      <h2>Firebase 연결 설정</h2>
+      <p>데이터를 실시간으로 공유하려면 무료 Firebase 프로젝트가 필요합니다.</p>
+    </div>
+    <div class="card">
+      <div class="step-row"><div class="step-dot">1</div><p><a href="https://console.firebase.google.com" target="_blank">Firebase Console</a>에서 새 프로젝트 생성</p></div>
+      <div class="step-row"><div class="step-dot">2</div><p>Realtime Database → 데이터베이스 만들기 (테스트 모드)</p></div>
+      <div class="step-row"><div class="step-dot">3</div><p>프로젝트 설정 → 앱 추가(&lt;/&gt;) → 웹앱 등록 후 설정값 복사</p></div>
+      <div class="step-row"><div class="step-dot">4</div><p>아래에 붙여넣고 저장</p></div>
+    </div>
+    <div class="card">
+      <div class="alert alert-info">Firebase 콘솔 → 프로젝트 설정 → 내 앱 → SDK 설정 및 구성</div>
+      <div class="form-group"><label>API Key</label><input type="text" id="fb_apiKey" placeholder="AIzaSy..." value="${saved.apiKey||''}"></div>
+      <div class="form-group"><label>Auth Domain</label><input type="text" id="fb_authDomain" placeholder="your-app.firebaseapp.com" value="${saved.authDomain||''}"></div>
+      <div class="form-group"><label>Database URL</label><input type="text" id="fb_databaseURL" placeholder="https://your-app-default-rtdb.firebaseio.com" value="${saved.databaseURL||''}"></div>
+      <div class="form-group"><label>Project ID</label><input type="text" id="fb_projectId" placeholder="your-app" value="${saved.projectId||''}"></div>
+      <div class="form-group"><label>Storage Bucket</label><input type="text" id="fb_storageBucket" placeholder="your-app.appspot.com" value="${saved.storageBucket||''}"></div>
+      <div class="form-group"><label>Messaging Sender ID</label><input type="text" id="fb_messagingSenderId" placeholder="123456789" value="${saved.messagingSenderId||''}"></div>
+      <div class="form-group"><label>App ID</label><input type="text" id="fb_appId" placeholder="1:123:web:abc" value="${saved.appId||''}"></div>
+      <button class="btn btn-primary btn-full" onclick="saveFirebaseConfig()">저장하고 연결</button>
     </div>
   `);
 }
-
 function saveFirebaseConfig() {
-  const config = {
-    apiKey: v('fb_apiKey'),
-    authDomain: v('fb_authDomain'),
-    databaseURL: v('fb_databaseURL'),
-    projectId: v('fb_projectId'),
-    storageBucket: v('fb_storageBucket'),
-    messagingSenderId: v('fb_messagingSenderId'),
-    appId: v('fb_appId'),
-  };
-  if (!config.apiKey || !config.databaseURL) {
-    alert('API Key와 Database URL은 필수입니다.');
-    return;
-  }
-  showLoading('Firebase에 연결 중...');
+  const config = { apiKey:v('fb_apiKey'), authDomain:v('fb_authDomain'), databaseURL:v('fb_databaseURL'), projectId:v('fb_projectId'), storageBucket:v('fb_storageBucket'), messagingSenderId:v('fb_messagingSenderId'), appId:v('fb_appId') };
+  if (!config.apiKey || !config.databaseURL) { alert('API Key와 Database URL은 필수입니다.'); return; }
+  showLoading('연결 중...');
   initFirebase(config);
 }
 
-// ─── Home View ────────────────────────────────────────────────
+// ── Home ──────────────────────────────────────────────────────
 function showHome() {
-  currentView = 'home';
-  currentMeetingId = null;
-  currentUser = null;
-  document.getElementById('backBtn').style.display = 'none';
-  document.getElementById('topTitle').textContent = '📅 회의 일정 조율';
-
+  currentView = 'home'; currentMeetingId = null; currentUser = null;
+  setHeroHTML('금요일작은찬양팀 정기모임', '✦ 일상과 기도제목 나누기<br>✦ 찬양팀 운영, 연습, 선곡 및 예배 형식 관련 논의', false);
   if (!db) { showSetupView(); return; }
-
-  showLoading('회의 목록 로딩 중...');
+  showLoading('불러오는 중...');
   db.ref('meetings').orderByChild('createdAt').once('value').then(snap => {
     hideLoading();
-    const meetings = [];
-    snap.forEach(child => {
-      meetings.unshift({ id: child.key, ...child.val() });
-    });
-
-    let listHtml = '';
-    if (meetings.length === 0) {
-      listHtml = '<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">아직 등록된 회의가 없습니다.<br>새 회의를 만들어보세요!</p>';
+    const list = [];
+    snap.forEach(c => list.unshift({ id: c.key, ...c.val() }));
+    let html = '';
+    if (!list.length) {
+      html = `<div class="empty"><div class="big">📋</div>아직 등록된 회의가 없습니다.<br>첫 회의를 만들어보세요!</div>`;
     } else {
-      listHtml = meetings.map(m => {
-        const dateCount = m.dates ? Object.keys(m.dates).length : 0;
-        const peopleCount = m.attendees ? Object.keys(m.attendees).length : 0;
-        const responseCount = m.responses ? Object.keys(m.responses).length : 0;
-        return `
-          <div class="meeting-item" onclick="location.hash='#meeting/${m.id}'">
-            <div class="icon">📋</div>
-            <div class="info">
-              <div class="title">${esc(m.title)}</div>
-              <div class="meta">일정 ${dateCount}개 · 대상자 ${peopleCount}명 · 응답 ${responseCount}명</div>
-            </div>
-            <div class="arrow">›</div>
+      html = list.map(m => {
+        const dc = m.dates ? Object.keys(m.dates).length : 0;
+        const pc = m.attendees ? Object.keys(m.attendees).length : 0;
+        const rc = m.responses ? Object.keys(m.responses).length : 0;
+        return `<div class="meeting-item" onclick="location.hash='#meeting/${m.id}'">
+          <div class="meet-icon">📋</div>
+          <div class="meet-info">
+            <div class="meet-title">${esc(m.title)}</div>
+            <div class="meet-meta">일정 ${dc}개 · 대상자 ${pc}명 · 응답 ${rc}명</div>
           </div>
-        `;
+          <div class="meet-arrow">›</div>
+        </div>`;
       }).join('');
     }
-
     render(`
-      <div class="container">
-        <div class="section-header">
-          <h2 style="font-size:17px;font-weight:700;">회의 목록</h2>
-          <button class="btn btn-primary btn-sm" onclick="location.hash='#create'">+ 새 회의</button>
-        </div>
-        ${listHtml}
+      <div class="list-header">
+        <h2>회의 목록</h2>
+        <button class="btn btn-primary btn-sm" onclick="location.hash='#create'">+ 새 회의</button>
       </div>
+      ${html}
     `);
   }).catch(err => {
     hideLoading();
-    if (err.message.includes('permission')) {
-      render(`<div class="container"><div class="alert alert-warn">
-        <b>데이터베이스 권한 오류</b><br>
-        Firebase Console에서 Realtime Database → 규칙(Rules)을 아래처럼 변경하세요:<br><br>
-        <code>{"rules": {".read": true, ".write": true}}</code>
-      </div></div>`);
-    } else {
-      render(`<div class="container"><div class="alert alert-warn">오류: ${err.message}</div></div>`);
-    }
+    render(`<div class="alert alert-warn">${err.message.includes('permission') ? 'Firebase 권한 오류 — Realtime Database 규칙을 테스트 모드로 설정하세요.' : '오류: ' + err.message}</div>`);
   });
 }
 
-// ─── Create Meeting ───────────────────────────────────────────
-let newDates = [];
-let newAttendees = [];
-
+// ── Create ────────────────────────────────────────────────────
+let newDates = [], newAttendees = [];
 function showCreate() {
   if (!db) { showSetupView(); return; }
-  currentView = 'create';
-  newDates = [];
-  newAttendees = [];
-  document.getElementById('backBtn').style.display = '';
-  document.getElementById('topTitle').textContent = '새 회의 만들기';
-
+  currentView = 'create'; newDates = []; newAttendees = [];
+  setHero('새 회의 만들기', '일정과 참석자를 입력하세요', true);
   render(`
-    <div class="container">
-      <div class="card">
-        <h2>기본 정보</h2>
-        <div class="form-group">
-          <label>회의 제목</label>
-          <input type="text" id="meetingTitle" placeholder="예: 4월 정기 팀 회의">
-        </div>
-        <div class="form-group">
-          <label>설명 (선택)</label>
-          <textarea id="meetingDesc" placeholder="회의 안건, 장소 등 추가 정보"></textarea>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>후보 일정</h2>
-        <div class="input-row">
-          <input type="date" id="newDate" min="${today()}">
-          <input type="text" id="newTime" placeholder="시간 (예: 14:00~16:00)" style="max-width:170px">
-          <button class="btn btn-secondary btn-sm" onclick="addDate()">추가</button>
-        </div>
-        <div class="tag-list" id="dateList"></div>
-      </div>
-
-      <div class="card">
-        <h2>참석 대상자</h2>
-        <div class="input-row">
-          <input type="text" id="newName" placeholder="이름 입력" onkeydown="if(event.key==='Enter')addAttendee()">
-          <button class="btn btn-secondary btn-sm" onclick="addAttendee()">추가</button>
-        </div>
-        <div class="tag-list" id="nameList"></div>
-      </div>
-
-      <button class="btn btn-primary btn-full" style="margin-bottom:40px" onclick="createMeeting()">
-        회의 만들기
-      </button>
+    <div class="card">
+      <div class="step-head"><div class="step-num-badge">1</div><div><div class="step-title">기본 정보</div></div></div>
+      <div class="form-group"><label>회의 제목</label><input type="text" id="meetingTitle" placeholder="예: 5월 정기 팀 회의"></div>
+      <div class="form-group"><label>설명 (선택)</label><textarea id="meetingDesc" placeholder="회의 안건, 장소 등 추가 정보"></textarea></div>
     </div>
+    <div class="card">
+      <div class="step-head"><div class="step-num-badge">2</div><div><div class="step-title">후보 일정</div><div class="step-sub">여러 날짜 추가 가능</div></div></div>
+      <div class="input-row">
+        <input type="date" id="newDate" min="${today()}">
+        <input type="text" id="newTime" placeholder="시간 예: 14:00~16:00" style="max-width:160px">
+        <button class="btn btn-secondary btn-sm" onclick="addDate()">추가</button>
+      </div>
+      <div class="tag-list" id="dateList"></div>
+    </div>
+    <div class="card">
+      <div class="step-head"><div class="step-num-badge">3</div><div><div class="step-title">참석 대상자</div><div class="step-sub">이름을 한 명씩 추가하세요</div></div></div>
+      <div class="input-row">
+        <input type="text" id="newName" placeholder="이름 입력" onkeydown="if(event.key==='Enter')addAttendee()">
+        <button class="btn btn-secondary btn-sm" onclick="addAttendee()">추가</button>
+      </div>
+      <div class="tag-list" id="nameList"></div>
+    </div>
+    <button class="btn btn-primary btn-full" style="margin-bottom:20px" onclick="createMeeting()">회의 만들기</button>
   `);
 }
-
 function addDate() {
   const d = v('newDate'), t = v('newTime');
   if (!d) { alert('날짜를 선택하세요.'); return; }
   const label = d + (t ? ' ' + t : '');
   if (newDates.find(x => x.label === label)) return;
   newDates.push({ label, date: d, time: t });
-  renderCreateTags();
+  renderTags();
   document.getElementById('newDate').value = '';
   document.getElementById('newTime').value = '';
 }
-
-function removeDate(i) { newDates.splice(i, 1); renderCreateTags(); }
-
+function removeDate(i) { newDates.splice(i, 1); renderTags(); }
 function addAttendee() {
   const name = v('newName').trim();
   if (!name) return;
   if (newAttendees.includes(name)) { alert('이미 있는 이름입니다.'); return; }
   newAttendees.push(name);
-  renderCreateTags();
+  renderTags();
   document.getElementById('newName').value = '';
 }
-
-function removeAttendee(i) { newAttendees.splice(i, 1); renderCreateTags(); }
-
-function renderCreateTags() {
+function removeAttendee(i) { newAttendees.splice(i, 1); renderTags(); }
+function renderTags() {
   const dl = document.getElementById('dateList');
-  if (dl) dl.innerHTML = newDates.map((d, i) => `
-    <span class="tag">${esc(d.label)}
-      <button class="remove" onclick="removeDate(${i})">×</button>
-    </span>`).join('');
-
+  if (dl) dl.innerHTML = newDates.map((d,i) => `<span class="tag">${esc(d.label)}<button class="remove" onclick="removeDate(${i})">×</button></span>`).join('');
   const nl = document.getElementById('nameList');
-  if (nl) nl.innerHTML = newAttendees.map((n, i) => `
-    <span class="tag">${esc(n)}
-      <button class="remove" onclick="removeAttendee(${i})">×</button>
-    </span>`).join('');
+  if (nl) nl.innerHTML = newAttendees.map((n,i) => `<span class="tag">${esc(n)}<button class="remove" onclick="removeAttendee(${i})">×</button></span>`).join('');
 }
-
 function createMeeting() {
-  const title = v('meetingTitle').trim();
-  const desc = v('meetingDesc').trim();
+  const title = v('meetingTitle').trim(), desc = v('meetingDesc').trim();
   if (!title) { alert('회의 제목을 입력하세요.'); return; }
-  if (newDates.length < 1) { alert('후보 일정을 하나 이상 추가하세요.'); return; }
-  if (newAttendees.length < 1) { alert('참석 대상자를 한 명 이상 추가하세요.'); return; }
-
+  if (!newDates.length) { alert('후보 일정을 하나 이상 추가하세요.'); return; }
+  if (!newAttendees.length) { alert('참석 대상자를 한 명 이상 추가하세요.'); return; }
   showLoading('회의 생성 중...');
-
-  const datesObj = {};
-  newDates.forEach((d, i) => { datesObj['d' + i] = d; });
-
-  const attendeesObj = {};
-  newAttendees.forEach((n, i) => { attendeesObj['a' + i] = n; });
-
+  const dObj = {}, aObj = {};
+  newDates.forEach((d,i) => dObj['d'+i] = d);
+  newAttendees.forEach((n,i) => aObj['a'+i] = n);
   const ref = db.ref('meetings').push();
-  ref.set({
-    title, desc,
-    dates: datesObj,
-    attendees: attendeesObj,
-    createdAt: Date.now(),
-  }).then(() => {
-    hideLoading();
-    location.hash = '#meeting/' + ref.key;
-  }).catch(err => {
-    hideLoading();
-    alert('오류: ' + err.message);
-  });
+  ref.set({ title, desc, dates: dObj, attendees: aObj, createdAt: Date.now() })
+    .then(() => { hideLoading(); location.hash = '#meeting/' + ref.key; })
+    .catch(err => { hideLoading(); alert('오류: ' + err.message); });
 }
 
-// ─── Meeting View ─────────────────────────────────────────────
-let meetingData = null;
-let meetingListener = null;
-let responseListener = null;
-
+// ── Meeting ───────────────────────────────────────────────────
+let meetingData = null, responseListener = null;
 function showMeeting(id) {
   if (!db) { showSetupView(); return; }
-  currentView = 'meeting';
-  currentMeetingId = id;
-  currentUser = null;
-  document.getElementById('backBtn').style.display = '';
-
+  currentView = 'meeting'; currentMeetingId = id; currentUser = null;
+  setHero('불러오는 중...', '', true);
   showLoading('회의 정보 로딩 중...');
-
-  // Clean up old listeners
-  if (meetingListener) { db.ref('meetings/' + currentMeetingId).off(); meetingListener = null; }
-  if (responseListener) { db.ref('meetings/' + currentMeetingId + '/responses').off(); responseListener = null; }
-
-  db.ref('meetings/' + id).once('value').then(snap => {
+  if (responseListener) { db.ref('meetings/'+id+'/responses').off(); responseListener = null; }
+  db.ref('meetings/'+id).once('value').then(snap => {
     hideLoading();
-    if (!snap.exists()) {
-      render('<div class="container"><div class="alert alert-warn">회의를 찾을 수 없습니다.</div></div>');
-      return;
-    }
+    if (!snap.exists()) { render('<div class="alert alert-warn">회의를 찾을 수 없습니다.</div>'); return; }
     meetingData = { id, ...snap.val() };
-    document.getElementById('topTitle').textContent = meetingData.title;
+    setHero('금요일작은찬양팀 정기모임', '✦ 일상과 기도제목 나누기<br>✦ 찬양팀 운영, 연습, 선곡 및 예배 형식 관련 논의', true);
     renderMeetingView();
-  }).catch(err => {
-    hideLoading();
-    render(`<div class="container"><div class="alert alert-warn">오류: ${err.message}</div></div>`);
-  });
+  }).catch(err => { hideLoading(); render(`<div class="alert alert-warn">오류: ${err.message}</div>`); });
 }
 
 function renderMeetingView() {
@@ -643,233 +615,139 @@ function renderMeetingView() {
   const attendees = m.attendees ? Object.values(m.attendees) : [];
   const shareUrl = location.href.split('#')[0] + '#meeting/' + m.id;
 
-  const nameButtons = attendees.map(n => `
-    <button class="name-btn${currentUser===n?' selected':''}" onclick="selectUser('${esc(n)}')">${esc(n)}</button>
-  `).join('');
-
   render(`
-    <div class="container">
-
-      ${m.desc ? `<div class="alert alert-info" style="margin-bottom:16px">${esc(m.desc)}</div>` : ''}
-
-      <!-- Share link -->
-      <div class="card">
-        <h2>공유 링크</h2>
-        <div class="share-box">
-          <span class="url">${esc(shareUrl)}</span>
-          <button class="copy-btn" onclick="copyUrl('${esc(shareUrl)}')">복사</button>
-        </div>
-      </div>
-
-      <!-- Name selector -->
-      <div class="card" id="nameCard">
-        <h2>이름 선택</h2>
-        <div class="name-grid">${nameButtons}</div>
-      </div>
-
-      <!-- Date options (shown after name selected) -->
-      <div class="card" id="responseCard" style="display:none">
-        <div class="section-header">
-          <h2>참석 가능 일정 선택</h2>
-          <span id="selectedNameBadge" style="font-size:13px;color:var(--primary);font-weight:600"></span>
-        </div>
-        <div class="date-options" id="dateOptions">
-          ${dates.map(([key, d]) => `
-            <div class="date-option" id="opt_${key}" onclick="toggleDate('${key}')">
-              <div class="check">✓</div>
-              <div class="date-label">${esc(d.label)}</div>
-            </div>
-          `).join('')}
-        </div>
-        <button class="btn btn-success btn-full" onclick="submitResponse()">응답 저장</button>
-      </div>
-
-      <!-- Summary -->
-      <div class="card">
-        <div class="section-header">
-          <h2>전체 참석 현황</h2>
-          <button class="btn btn-secondary btn-sm" onclick="refreshSummary()">새로고침</button>
-        </div>
-        <div class="grid-wrap" id="summaryGrid">
-          <div style="text-align:center;padding:20px;color:var(--gray-400);font-size:14px">
-            <div class="spinner"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Delete -->
-      <div style="text-align:center;margin-bottom:40px">
-        <button class="btn btn-danger btn-sm" onclick="deleteMeeting()">이 회의 삭제</button>
+    <!-- 이름 선택 -->
+    <div class="card">
+      <div class="step-head"><div class="step-num-badge">1</div><div><div class="step-title">본인을 선택해주세요</div></div></div>
+      <div class="name-grid">
+        ${attendees.map(n => `<button class="name-btn${currentUser===n?' selected':''}" onclick="selectUser('${esc(n)}')">${esc(n)}</button>`).join('')}
       </div>
     </div>
-  `);
 
+    <!-- 날짜 선택 -->
+    <div class="card" id="responseCard" style="display:none">
+      <div class="step-head">
+        <div class="step-num-badge">2</div>
+        <div>
+          <div class="step-title">참석 가능한 날짜를 선택해주세요</div>
+          <div class="step-sub" id="selectedNameBadge">여러 날짜 선택 가능</div>
+        </div>
+      </div>
+      <div class="date-cards" id="dateOptions">
+        ${dates.map(([key, d]) => {
+          const parts = d.date ? d.date.split('-') : [];
+          const mon = parts[1] ? ['','1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'][parseInt(parts[1])] : '';
+          const day = parts[2] ? parseInt(parts[2]) : '';
+          return `<div class="date-card" id="opt_${key}" onclick="toggleDate('${key}')">
+            <div class="date-cal">
+              <div class="date-cal-top">${esc(mon)}</div>
+              <div class="date-cal-num">${day}</div>
+            </div>
+            <div class="date-info">
+              <div class="date-main">${esc(d.date || d.label)}</div>
+              ${d.time ? `<div class="date-time">⏰ ${esc(d.time)}</div>` : ''}
+            </div>
+            <div class="date-check">✓</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <button class="btn btn-success btn-full" onclick="submitResponse()">응답 저장하기</button>
+    </div>
+
+    <!-- 현황 -->
+    <div class="card">
+      <div class="step-head">
+        <div class="step-num-badge">3</div>
+        <div><div class="step-title">참석 현황</div><div class="step-sub">실시간 업데이트</div></div>
+        <div style="margin-left:auto"><button class="btn btn-secondary btn-sm" onclick="loadSummary()">새로고침</button></div>
+      </div>
+      <div class="grid-wrap" id="summaryGrid"><div style="text-align:center;padding:24px"><div class="spinner" style="margin:0 auto"></div></div></div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:20px">
+      <button class="btn btn-danger btn-sm" onclick="deleteMeeting()">이 회의 삭제</button>
+    </div>
+  `);
   loadSummary();
   listenResponses();
 }
 
 let selectedDates = new Set();
-
 function selectUser(name) {
   currentUser = name;
-  document.querySelectorAll('.name-btn').forEach(b => {
-    b.classList.toggle('selected', b.textContent === name);
-  });
-  document.getElementById('selectedNameBadge').textContent = name + '님';
+  document.querySelectorAll('.name-btn').forEach(b => b.classList.toggle('selected', b.textContent === name));
+  document.getElementById('selectedNameBadge').textContent = name + '님, 가능한 날짜를 선택해주세요';
   document.getElementById('responseCard').style.display = '';
-
   selectedDates.clear();
-
-  // Load existing response
-  db.ref('meetings/' + currentMeetingId + '/responses/' + encodeName(name)).once('value').then(snap => {
-    if (snap.exists()) {
-      const data = snap.val();
-      selectedDates = new Set(data.available || []);
-    }
-    refreshDateOptions();
+  db.ref('meetings/'+currentMeetingId+'/responses/'+encName(name)).once('value').then(snap => {
+    if (snap.exists()) selectedDates = new Set(snap.val().available || []);
+    refreshDateCards();
   });
 }
-
-function encodeName(name) {
-  return encodeURIComponent(name).replace(/\./g, '%2E');
-}
-
 function toggleDate(key) {
-  if (selectedDates.has(key)) selectedDates.delete(key);
-  else selectedDates.add(key);
-  refreshDateOptions();
+  selectedDates.has(key) ? selectedDates.delete(key) : selectedDates.add(key);
+  refreshDateCards();
 }
-
-function refreshDateOptions() {
-  document.querySelectorAll('.date-option').forEach(el => {
-    const key = el.id.replace('opt_', '');
-    el.classList.toggle('selected', selectedDates.has(key));
+function refreshDateCards() {
+  document.querySelectorAll('.date-card').forEach(el => {
+    el.classList.toggle('selected', selectedDates.has(el.id.replace('opt_','')));
   });
 }
-
 function submitResponse() {
   if (!currentUser) { alert('이름을 먼저 선택하세요.'); return; }
-  showLoading('응답 저장 중...');
-  db.ref('meetings/' + currentMeetingId + '/responses/' + encodeName(currentUser)).set({
-    name: currentUser,
-    available: [...selectedDates],
-    updatedAt: Date.now(),
-  }).then(() => {
-    hideLoading();
-    loadSummary();
-    showToast('응답이 저장되었습니다!');
-  }).catch(err => {
-    hideLoading();
-    alert('오류: ' + err.message);
-  });
+  showLoading('저장 중...');
+  db.ref('meetings/'+currentMeetingId+'/responses/'+encName(currentUser))
+    .set({ name: currentUser, available: [...selectedDates], updatedAt: Date.now() })
+    .then(() => { hideLoading(); loadSummary(); showToast('응답이 저장되었습니다! ✓'); })
+    .catch(err => { hideLoading(); alert('오류: ' + err.message); });
 }
-
 function listenResponses() {
-  if (responseListener) return;
-  responseListener = db.ref('meetings/' + currentMeetingId + '/responses');
+  responseListener = db.ref('meetings/'+currentMeetingId+'/responses');
   responseListener.on('value', () => loadSummary());
 }
-
-function refreshSummary() { loadSummary(); }
-
 function loadSummary() {
   const m = meetingData;
   const dates = m.dates ? Object.entries(m.dates).sort((a,b) => a[1].date.localeCompare(b[1].date)) : [];
   const attendees = m.attendees ? Object.values(m.attendees) : [];
-
-  db.ref('meetings/' + currentMeetingId + '/responses').once('value').then(snap => {
-    const responses = {};
-    snap.forEach(child => {
-      const r = child.val();
-      responses[r.name] = new Set(r.available || []);
-    });
-
-    const counts = {};
-    dates.forEach(([key]) => { counts[key] = 0; });
-
-    let rows = '';
-    attendees.forEach(name => {
-      const avail = responses[name];
+  db.ref('meetings/'+currentMeetingId+'/responses').once('value').then(snap => {
+    const res = {};
+    snap.forEach(c => { const r = c.val(); res[r.name] = new Set(r.available||[]); });
+    const counts = {}; dates.forEach(([k]) => counts[k] = 0);
+    const rows = attendees.map(name => {
+      const avail = res[name];
       const isMe = name === currentUser;
-      rows += `<tr class="${isMe ? 'my-row' : ''}">
-        <td>${esc(name)}</td>
-        ${dates.map(([key]) => {
-          if (!avail) return `<td class="cell-pending">-</td>`;
-          const ok = avail.has(key);
-          if (ok) counts[key]++;
-          return `<td class="${ok ? 'cell-yes' : 'cell-no'}">${ok ? '○' : '✕'}</td>`;
-        }).join('')}
-      </tr>`;
-    });
-
-    const grid = `
-      <table class="grid">
-        <thead>
-          <tr>
-            <th>이름</th>
-            ${dates.map(([k, d]) => `<th>${esc(d.label)}</th>`).join('')}
-          </tr>
-        </thead>
-        <tbody>
-          ${rows}
-          <tr class="count-row">
-            <td>참석 가능</td>
-            ${dates.map(([k]) => `<td>${counts[k]}명</td>`).join('')}
-          </tr>
-        </tbody>
-      </table>
-    `;
-
+      return `<tr class="${isMe?'my-row':''}"><td>${esc(name)}</td>${dates.map(([k]) => {
+        if (!avail) return `<td class="cell-pending">-</td>`;
+        const ok = avail.has(k);
+        if (ok) counts[k]++;
+        return `<td class="${ok?'cell-yes':'cell-no'}">${ok?'○':'✕'}</td>`;
+      }).join('')}</tr>`;
+    }).join('');
     const el = document.getElementById('summaryGrid');
-    if (el) el.innerHTML = grid;
+    if (el) el.innerHTML = `<table class="grid"><thead><tr><th>이름</th>${dates.map(([k,d])=>`<th>${esc(d.date||d.label)}</th>`).join('')}</tr></thead><tbody>${rows}<tr class="count-row"><td>가능 인원</td>${dates.map(([k])=>`<td>${counts[k]}명</td>`).join('')}</tr></tbody></table>`;
   });
 }
-
 function deleteMeeting() {
-  if (!confirm('이 회의를 삭제하시겠습니까? 모든 응답 데이터가 사라집니다.')) return;
+  if (!confirm('이 회의를 삭제하시겠습니까?')) return;
   showLoading('삭제 중...');
-  db.ref('meetings/' + currentMeetingId).remove().then(() => {
-    hideLoading();
-    location.hash = '#';
-  });
+  db.ref('meetings/'+currentMeetingId).remove().then(() => { hideLoading(); location.hash = '#'; });
 }
 
-// ─── Utilities ────────────────────────────────────────────────
-function render(html) {
-  document.getElementById('app').innerHTML = html;
-}
-
-function v(id) {
-  const el = document.getElementById(id);
-  return el ? el.value : '';
-}
-
-function esc(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function today() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function copyUrl(url) {
-  navigator.clipboard.writeText(url).then(() => showToast('링크가 복사되었습니다!'));
-}
-
+// ── Utils ─────────────────────────────────────────────────────
+function render(html) { document.getElementById('app').innerHTML = html; }
+function v(id) { const e = document.getElementById(id); return e ? e.value : ''; }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function today() { return new Date().toISOString().slice(0,10); }
+function encName(n) { return encodeURIComponent(n).replace(/\./g,'%2E'); }
+function copyUrl(url) { navigator.clipboard.writeText(url).then(() => showToast('링크가 복사되었습니다!')); }
 function showToast(msg) {
   const t = document.createElement('div');
-  t.textContent = msg;
-  t.style.cssText = `
-    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-    background:#1f2937;color:white;padding:10px 20px;border-radius:20px;
-    font-size:13px;z-index:200;box-shadow:var(--shadow-md);
-    animation:fadeIn .2s ease;
-  `;
+  t.className = 'toast'; t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 2500);
 }
 
-// ─── Boot ─────────────────────────────────────────────────────
+// ── Boot ──────────────────────────────────────────────────────
 const HARDCODED_CONFIG = {
   apiKey: "AIzaSyByLFBvtwG8eEID4h0NdLgeJUdFyTxrqGE",
   authDomain: "fnl-praise.firebaseapp.com",
@@ -879,23 +757,11 @@ const HARDCODED_CONFIG = {
   messagingSenderId: "352999506160",
   appId: "1:352999506160:web:16628134fa08d3e3938235",
 };
-
 (function boot() {
   const saved = localStorage.getItem('fbConfig');
-  if (saved) {
-    try {
-      initFirebase(JSON.parse(saved));
-    } catch(e) {
-      initFirebase(HARDCODED_CONFIG);
-    }
-  } else {
-    initFirebase(HARDCODED_CONFIG);
-  }
+  try { initFirebase(saved ? JSON.parse(saved) : HARDCODED_CONFIG); }
+  catch(e) { initFirebase(HARDCODED_CONFIG); }
 })();
 </script>
-
-<style>
-@keyframes fadeIn { from { opacity:0; transform:translateX(-50%) translateY(8px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
-</style>
 </body>
 </html>
