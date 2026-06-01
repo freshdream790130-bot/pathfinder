@@ -6,118 +6,163 @@
 <title>FNL-PRAISE · 회의 일정 조율</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap');
-
+/* ════════════════════════════════════════
+   NOTION DESIGN SYSTEM — Meeting Scheduler
+   Inter · Navy hero · Purple CTA · Pastels
+   8px buttons · 12px cards · Soft shadows
+   ════════════════════════════════════════ */
 :root {
-  --p1: #6b45b8;
-  --p2: #9b7dd4;
-  --p3: #c4aef0;
-  --p-light: #f4f0ff;
-  --green: #4aaa84;
-  --green-light: #e8f7f2;
-  --red-light: #fdf0f0;
-  --red: #d96b6b;
-  --bg: #f7f5f2;
-  --card: #ffffff;
-  --border: #ede8e0;
-  --border2: #d8d0c8;
-  --txt: #2d2820;
-  --txt2: #7a6f66;
-  --txt3: #b0a89e;
-  --r: 20px;
-  --r2: 12px;
-  --sh: 0 4px 20px rgba(80,50,30,.08);
-  --sh2: 0 8px 32px rgba(80,50,30,.14);
+  /* Brand */
+  --primary: #6e57e0;
+  --primary-pressed: #5b44cd;
+  --brand-navy: #111827;
+  --brand-navy-mid: #1f2937;
+  --link-blue: #2563eb;
+  /* Pastel tints */
+  --tint-peach: #fff0e8;
+  --tint-rose: #fff0f3;
+  --tint-mint: #edfaf4;
+  --tint-lavender: #f0ecff;
+  --tint-sky: #ebf4ff;
+  --tint-yellow: #fefce8;
+  --tint-yellow-bold: #fde047;
+  --tint-cream: #fafaf7;
+  /* Surface */
+  --canvas: #ffffff;
+  --surface: #f9fafb;
+  --surface-soft: #f3f4f6;
+  --hairline: #e5e7eb;
+  --hairline-soft: #f0f0ef;
+  --hairline-strong: #d1d5db;
+  /* Text */
+  --ink-deep: #000000;
+  --ink: #111827;
+  --charcoal: #1f2937;
+  --slate: #374151;
+  --steel: #6b7280;
+  --stone: #9ca3af;
+  --muted: #d1d5db;
+  --on-dark: #ffffff;
+  --on-dark-muted: rgba(255,255,255,.7);
+  /* Semantic */
+  --success: #16a34a;
+  --warning: #ea580c;
+  --error: #dc2626;
+  /* Radii */
+  --r-xs: 4px; --r-sm: 6px; --r-md: 8px;
+  --r-lg: 12px; --r-xl: 16px; --r-full: 9999px;
+  /* Shadows */
+  --sh-1: 0 1px 2px rgba(15,15,15,.04);
+  --sh-2: 0 4px 12px rgba(15,15,15,.08);
+  --sh-3: 0 24px 48px -8px rgba(15,15,15,.20);
+  --sh-4: 0 16px 48px -8px rgba(15,15,15,.16);
+  /* Legacy compat */
+  --p1: #6e57e0; --p2: #9b8ef0; --p3: #c4bdf8; --p-light: #f0ecff;
+  --green: #16a34a; --green-light: #edfaf4;
+  --red-light: #fff0f0; --red: #dc2626;
+  --bg: #f9fafb; --card: #ffffff;
+  --border: #e5e7eb; --border2: #d1d5db;
+  --txt: #111827; --txt2: #6b7280; --txt3: #9ca3af;
+  --r: 12px; --r2: 8px;
+  --sh: var(--sh-2); --sh2: var(--sh-3);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'Noto Sans KR', -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--txt);
+  font-family: 'Inter', -apple-system, system-ui, 'Segoe UI', Helvetica, sans-serif;
+  background: var(--surface);
+  color: var(--ink);
   min-height: 100vh;
+  font-size: 16px;
+  line-height: 1.55;
 }
 
 /* ── Loading ── */
 #loading {
-  position: fixed; inset: 0; background: rgba(247,245,242,.92);
+  position: fixed; inset: 0; background: rgba(255,255,255,.9);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 14px; z-index: 200; font-size: 14px; color: var(--txt2);
+  gap: 12px; z-index: 200; font-size: 14px; color: var(--steel);
 }
 .spinner {
-  width: 28px; height: 28px;
-  border: 3px solid var(--border2); border-top-color: var(--p1);
+  width: 24px; height: 24px;
+  border: 2.5px solid var(--hairline); border-top-color: var(--primary);
   border-radius: 50%; animation: spin .7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── Hero Header ── */
+/* ── Top nav (home) ── */
+#homeBar {
+  background: var(--canvas);
+  border-bottom: 1px solid var(--hairline);
+  padding: 0 32px;
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 50;
+  box-shadow: 0 1px 0 var(--hairline);
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+}
+.nav-logo-badge {
+  display: inline-flex; flex-direction: column; align-items: center;
+  background: var(--primary); border-radius: var(--r-sm);
+  padding: 4px 10px; line-height: 1.1;
+}
+.nav-logo-badge .top { font-size: 8px; font-weight: 600; letter-spacing: 2px; color: rgba(255,255,255,.75); text-transform: uppercase; }
+.nav-logo-badge .bot { font-size: 13px; font-weight: 700; color: white; letter-spacing: .5px; }
+.nav-title { font-size: 15px; font-weight: 600; color: var(--charcoal); }
+
+/* ── Hero band (meeting view) ── */
 .hero {
-  background: linear-gradient(145deg, #4e2e98 0%, #7c5cbf 50%, #a87ee0 100%);
-  padding: 28px 20px 48px;
+  background: var(--brand-navy);
+  padding: 40px 32px 60px;
   text-align: center;
   position: relative;
-  overflow: hidden;
+  display: none;
 }
-.hero::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 70% 20%, rgba(255,255,255,.12) 0%, transparent 60%),
-              radial-gradient(ellipse at 20% 80%, rgba(255,255,255,.08) 0%, transparent 50%);
-}
-.hero-inner { position: relative; z-index: 1; }
-
-/* Logo badge */
+.hero-inner { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; }
 .logo-badge {
   display: inline-flex; flex-direction: column; align-items: center;
-  background: rgba(255,255,255,.15); backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,.3);
-  border-radius: 16px; padding: 10px 24px; margin-bottom: 14px;
+  background: var(--primary); border-radius: var(--r-sm);
+  padding: 5px 14px; margin-bottom: 16px; line-height: 1.1;
+  box-shadow: 0 4px 14px rgba(110,87,224,.4);
 }
-.logo-fnl {
-  font-size: 11px; font-weight: 900; letter-spacing: 4px;
-  color: rgba(255,255,255,.7); line-height: 1;
-}
-.logo-praise {
-  font-size: 20px; font-weight: 900; letter-spacing: 2px;
-  color: #ffffff; line-height: 1.2;
-}
-
-.hero-title {
-  font-size: 22px; font-weight: 700; color: white;
-  margin-bottom: 6px; line-height: 1.4;
-}
-.hero-subtitle {
-  font-size: 13px; color: rgba(255,255,255,.72); line-height: 1.6;
-}
+.logo-fnl  { font-size: 9px; font-weight: 600; letter-spacing: 3px; color: rgba(255,255,255,.7); text-transform: uppercase; }
+.logo-praise { font-size: 16px; font-weight: 700; color: white; letter-spacing: .5px; }
+.hero-title { font-size: 28px; font-weight: 600; color: var(--on-dark); margin-bottom: 8px; letter-spacing: -.5px; line-height: 1.25; }
+.hero-subtitle { font-size: 15px; color: var(--on-dark-muted); line-height: 1.6; }
 .hero-back {
-  position: absolute; left: 16px; top: 20px; z-index: 2;
-  background: rgba(255,255,255,.2); border: none; color: white;
-  font-size: 20px; width: 36px; height: 36px; border-radius: 10px;
-  cursor: pointer; display: none; align-items: center; justify-content: center;
-  transition: background .15s;
+  position: absolute; left: 16px; top: 16px; z-index: 2;
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+  color: white; font-size: 13px; font-weight: 500;
+  padding: 6px 14px; border-radius: var(--r-md);
+  cursor: pointer; display: none; align-items: center; gap: 6px;
 }
-.hero-back:hover { background: rgba(255,255,255,.3); }
+.hero-back:hover { background: rgba(255,255,255,.18); }
 .hero-settings {
-  background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.3);
-  color: white; font-size: 15px; padding: 6px 12px; border-radius: 10px;
-  cursor: pointer; transition: background .15s; flex-shrink: 0;
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+  color: white; font-size: 14px; padding: 6px 12px; border-radius: var(--r-md);
+  cursor: pointer; flex-shrink: 0; font-size: 15px;
 }
-.hero-settings:hover { background: rgba(255,255,255,.3); }
+.hero-settings:hover { background: rgba(255,255,255,.18); }
 
-/* Floating card overlap */
+/* ── Content wrap ── */
 .content-wrap {
   max-width: 680px; margin: 0 auto;
-  padding: 20px 16px 60px; position: relative; z-index: 2;
+  padding: 24px 24px 60px;
 }
 
 /* ── Cards ── */
 .card {
-  background: var(--card); border-radius: var(--r);
-  box-shadow: var(--sh); padding: 24px;
-  margin-bottom: 16px; border: 1px solid var(--border);
+  background: var(--canvas);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--sh-2);
+  padding: 24px;
+  margin-bottom: 16px;
 }
 
 /* Step header */
@@ -125,298 +170,255 @@ body {
   display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
 }
 .step-num-badge {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--p1), var(--p2));
-  color: white; font-size: 14px; font-weight: 700;
+  width: 28px; height: 28px; border-radius: var(--r-full);
+  background: var(--primary); color: white;
+  font-size: 13px; font-weight: 600;
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; box-shadow: 0 3px 10px rgba(107,69,184,.35);
+  flex-shrink: 0;
 }
-.step-title { font-size: 16px; font-weight: 700; color: var(--txt); }
-.step-sub { font-size: 12px; color: var(--txt3); margin-top: 1px; }
-
-/* ── Meeting list ── */
-.meeting-item {
-  display: flex; align-items: center; gap: 14px;
-  padding: 16px 18px; background: var(--card); border-radius: var(--r2);
-  box-shadow: var(--sh); margin-bottom: 12px;
-  cursor: pointer; transition: all .2s;
-  border: 1.5px solid var(--border);
-}
-.meeting-item:hover { box-shadow: var(--sh2); border-color: var(--p3); transform: translateY(-2px); }
-.meet-icon {
-  width: 48px; height: 48px; border-radius: 14px;
-  background: linear-gradient(135deg, var(--p1), var(--p2));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px; flex-shrink: 0; box-shadow: 0 4px 12px rgba(107,69,184,.3);
-}
-.meet-info { flex: 1; min-width: 0; }
-.meet-title { font-weight: 700; font-size: 15px; color: var(--txt); }
-.meet-meta { font-size: 12px; color: var(--txt3); margin-top: 4px; }
-.meet-arrow { color: var(--p3); font-size: 22px; }
+.step-title { font-size: 15px; font-weight: 600; color: var(--charcoal); }
+.step-sub   { font-size: 13px; color: var(--stone); margin-top: 1px; }
 
 /* ── Name buttons ── */
-.name-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+.name-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
 .name-btn {
-  padding: 13px 10px; border-radius: var(--r2);
-  border: 2px solid var(--border);
-  background: var(--bg); cursor: pointer;
-  font-size: 14px; font-weight: 600; color: var(--txt);
-  transition: all .2s; text-align: center;
-  font-family: inherit;
+  padding: 10px 8px; border-radius: var(--r-md);
+  border: 1px solid var(--hairline-strong);
+  background: var(--surface); cursor: pointer;
+  font-size: 14px; font-weight: 500; color: var(--charcoal);
+  transition: border-color .15s, background .15s, box-shadow .15s;
+  text-align: center; font-family: inherit;
 }
-.name-btn:hover { border-color: var(--p3); color: var(--p1); background: var(--p-light); transform: translateY(-1px); box-shadow: var(--sh); }
+.name-btn:hover { border-color: var(--primary); background: var(--tint-lavender); box-shadow: var(--sh-1); }
 .name-btn.selected {
-  border-color: var(--p1);
-  background: linear-gradient(135deg, var(--p1), var(--p2));
-  color: white; box-shadow: 0 5px 16px rgba(107,69,184,.35);
-  transform: translateY(-2px);
+  border-color: var(--primary); background: var(--primary); color: white;
+  box-shadow: 0 3px 10px rgba(110,87,224,.3);
 }
 
 /* ── Date cards ── */
-.date-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.date-cards { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
 .date-card {
-  display: flex; align-items: center; gap: 16px;
-  padding: 14px 18px; border-radius: var(--r2);
-  border: 2px solid var(--border); background: var(--bg);
-  cursor: pointer; transition: all .2s;
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 16px; border-radius: var(--r-md);
+  border: 1px solid var(--hairline); background: var(--surface);
+  cursor: pointer; transition: all .15s;
 }
-.date-card:hover { border-color: var(--p3); background: var(--p-light); }
-.date-card.selected { border-color: var(--green); background: var(--green-light); }
+.date-card:hover { border-color: var(--primary); background: var(--tint-lavender); box-shadow: var(--sh-1); }
+.date-card.selected { border-color: var(--success); background: var(--tint-mint); }
 
-.date-cal {
-  width: 52px; flex-shrink: 0; border-radius: 10px;
-  overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.1);
-}
+.date-cal { width: 48px; flex-shrink: 0; border-radius: var(--r-sm); overflow: hidden; box-shadow: var(--sh-1); }
 .date-cal-top {
-  background: linear-gradient(135deg, var(--p1), var(--p2));
-  color: white; font-size: 9px; font-weight: 700;
-  text-align: center; padding: 4px 2px; letter-spacing: .5px;
+  background: var(--primary); color: white;
+  font-size: 9px; font-weight: 600; text-align: center;
+  padding: 3px 2px; letter-spacing: .5px; text-transform: uppercase;
 }
-.date-card.selected .date-cal-top { background: linear-gradient(135deg, #3a8a6a, var(--green)); }
+.date-card.selected .date-cal-top { background: var(--success); }
 .date-cal-num {
-  background: white; color: var(--txt);
-  font-size: 22px; font-weight: 900;
-  text-align: center; padding: 4px 2px 6px;
-  line-height: 1;
+  background: white; color: var(--ink);
+  font-size: 20px; font-weight: 700;
+  text-align: center; padding: 3px 2px 5px; line-height: 1;
+  border: 1px solid var(--hairline); border-top: none;
 }
-.date-card.selected .date-cal-num { color: #2a6a50; }
-
 .date-info { flex: 1; }
-.date-main { font-size: 14px; font-weight: 700; color: var(--txt); }
-.date-time { font-size: 12px; color: var(--txt3); margin-top: 2px; }
+.date-main { font-size: 14px; font-weight: 500; color: var(--charcoal); }
+.date-time { font-size: 12px; color: var(--steel); margin-top: 2px; }
 .date-check {
-  width: 26px; height: 26px; border-radius: 50%;
-  border: 2px solid var(--border2);
+  width: 22px; height: 22px; border-radius: var(--r-full);
+  border: 1.5px solid var(--hairline-strong);
   display: flex; align-items: center; justify-content: center;
-  font-size: 13px; flex-shrink: 0; transition: all .2s; color: transparent;
+  font-size: 11px; font-weight: 700; flex-shrink: 0; color: transparent;
 }
-.date-card.selected .date-check { background: var(--green); border-color: var(--green); color: white; }
+.date-card.selected .date-check { background: var(--success); border-color: var(--success); color: white; }
 
 /* ── Summary table ── */
-.grid-wrap { overflow-x: auto; border-radius: var(--r2); }
+.grid-wrap { overflow-x: auto; border-radius: var(--r-md); border: 1px solid var(--hairline); }
 table.grid { border-collapse: collapse; min-width: 100%; font-size: 13px; }
 table.grid th, table.grid td {
-  padding: 11px 14px; border: 1px solid var(--border);
+  padding: 10px 14px; border-bottom: 1px solid var(--hairline-soft);
   text-align: center; white-space: nowrap;
 }
-table.grid th {
-  background: var(--bg); font-weight: 700;
-  color: var(--txt2); font-size: 12px; letter-spacing: .02em;
-}
-table.grid td:first-child { text-align: left; font-weight: 600; }
-.cell-yes { background: var(--green-light); color: #2a6a50; font-weight: 700; font-size: 16px; }
-.cell-no { background: var(--red-light); color: var(--red); }
-.cell-pending { color: var(--txt3); }
-.count-row td {
-  background: var(--p-light); font-weight: 700;
-  color: var(--p1); border-top: 2px solid var(--p3);
-}
-.my-row td:first-child { color: var(--p1); }
-.my-row td:first-child::after { content: ' ★'; font-size: 11px; }
+table.grid th { background: var(--surface); font-weight: 600; color: var(--slate); font-size: 12px; }
+table.grid td:first-child { text-align: left; font-weight: 500; color: var(--charcoal); }
+.cell-yes { background: var(--tint-mint); color: var(--success); font-weight: 600; font-size: 15px; }
+.cell-no  { color: var(--stone); }
+.cell-pending { color: var(--muted); }
+.count-row td { background: var(--tint-lavender); font-weight: 600; color: var(--primary); border-top: 1px solid var(--hairline); }
+.my-row td:first-child { color: var(--primary); font-weight: 600; }
+.my-row td:first-child::after { content: ' ✦'; font-size: 10px; opacity: .7; }
 
 /* ── Buttons ── */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  padding: 12px 24px; border-radius: 50px; border: none;
-  font-size: 14px; font-weight: 700; cursor: pointer;
-  transition: all .2s; font-family: inherit;
+  padding: 10px 18px; border-radius: var(--r-md); border: none;
+  font-size: 14px; font-weight: 500; cursor: pointer;
+  transition: background .15s, box-shadow .15s, opacity .15s;
+  font-family: inherit; line-height: 1.3;
 }
-.btn-primary {
-  background: linear-gradient(135deg, var(--p1), var(--p2));
-  color: white; box-shadow: 0 4px 14px rgba(107,69,184,.35);
-}
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(107,69,184,.45); }
-.btn-success {
-  background: linear-gradient(135deg, #3a8a6a, var(--green));
-  color: white; box-shadow: 0 4px 14px rgba(74,170,132,.35);
-}
-.btn-success:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(74,170,132,.45); }
-.btn-secondary {
-  background: var(--bg); color: var(--txt2);
-  border: 1.5px solid var(--border2);
-}
-.btn-secondary:hover { background: var(--border); }
-.btn-danger { background: var(--red); color: white; }
-.btn-outline {
-  background: white; color: var(--p1);
-  border: 1.5px solid var(--p3);
-}
-.btn-outline:hover { background: var(--p-light); }
-.btn-sm { padding: 7px 16px; font-size: 13px; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-pressed); }
+.btn-success { background: var(--success); color: white; }
+.btn-success:hover { background: #15803d; }
+.btn-secondary { background: var(--surface); color: var(--slate); border: 1px solid var(--hairline-strong); }
+.btn-secondary:hover { background: var(--surface-soft); }
+.btn-danger { background: var(--error); color: white; }
+.btn-outline { background: transparent; color: var(--ink); border: 1px solid var(--hairline-strong); }
+.btn-outline:hover { background: var(--surface); }
+.btn-dark { background: var(--ink-deep); color: white; }
+.btn-sm { padding: 6px 14px; font-size: 13px; }
 .btn-full { width: 100%; }
 
 /* ── Forms ── */
-.form-group { margin-bottom: 16px; }
-label { display: block; font-size: 13px; font-weight: 600; color: var(--txt2); margin-bottom: 6px; }
+.form-group { margin-bottom: 14px; }
+label { display: block; font-size: 13px; font-weight: 500; color: var(--slate); margin-bottom: 5px; }
 input[type=text], input[type=date], textarea {
-  width: 100%; padding: 11px 14px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--r2); font-size: 14px;
-  outline: none; background: var(--bg);
-  color: var(--txt); transition: all .15s;
-  font-family: inherit;
+  width: 100%; padding: 10px 12px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-md); font-size: 14px;
+  outline: none; background: var(--canvas); color: var(--ink);
+  transition: border .15s, box-shadow .15s; font-family: inherit;
+  height: 44px;
 }
-input:focus, textarea:focus { border-color: var(--p2); background: white; }
-textarea { resize: vertical; min-height: 80px; }
+textarea { height: auto; min-height: 80px; resize: vertical; }
+input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(110,87,224,.12); }
 .input-row { display: flex; gap: 8px; }
 .input-row input { flex: 1; }
 
 /* ── Tags ── */
-.tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .tag {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: var(--p-light); color: var(--p1);
-  border: 1px solid var(--p3);
-  border-radius: 20px; padding: 5px 14px;
-  font-size: 13px; font-weight: 500;
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--tint-lavender); color: var(--primary);
+  border-radius: var(--r-xs); padding: 4px 10px;
+  font-size: 13px; font-weight: 500; border: 1px solid var(--p3);
 }
-.tag .remove {
-  cursor: pointer; opacity: .6; font-size: 15px;
-  border: none; background: none; color: inherit; padding: 0;
-}
+.tag .remove { cursor: pointer; opacity: .6; font-size: 14px; border: none; background: none; color: inherit; padding: 0; }
 .tag .remove:hover { opacity: 1; }
 
 /* ── Share box ── */
 .share-box {
-  background: var(--bg); border: 1.5px solid var(--border);
-  border-radius: var(--r2); padding: 12px 16px;
+  background: var(--surface); border: 1px solid var(--hairline);
+  border-radius: var(--r-md); padding: 10px 14px;
   display: flex; align-items: center; gap: 10px;
 }
-.share-box .url { flex: 1; font-size: 12px; color: var(--txt2); word-break: break-all; }
+.share-box .url { flex: 1; font-size: 12px; color: var(--steel); word-break: break-all; }
 .copy-btn {
-  flex-shrink: 0;
-  background: linear-gradient(135deg, var(--p1), var(--p2));
-  color: white; border: none; border-radius: 20px;
-  padding: 7px 16px; font-size: 12px; font-weight: 700;
+  flex-shrink: 0; background: var(--primary); color: white;
+  border: none; border-radius: var(--r-md);
+  padding: 7px 14px; font-size: 12px; font-weight: 500;
   cursor: pointer; font-family: inherit;
-  box-shadow: 0 3px 10px rgba(107,69,184,.3);
 }
-.copy-btn:hover { opacity: .9; }
+.copy-btn:hover { background: var(--primary-pressed); }
 
 /* ── Alerts ── */
-.alert { padding: 12px 16px; border-radius: var(--r2); font-size: 13px; margin-bottom: 16px; line-height: 1.6; }
-.alert-info { background: var(--p-light); color: #4a2d90; border: 1px solid var(--p3); }
-.alert-warn { background: #fff8ec; color: #8a6020; border: 1px solid #f5d898; }
+.alert { padding: 12px 16px; border-radius: var(--r-md); font-size: 14px; margin-bottom: 14px; line-height: 1.5; }
+.alert-info { background: var(--tint-lavender); color: #4a2d90; border: 1px solid var(--p3); }
+.alert-warn { background: #fff8ed; color: #92400e; border: 1px solid #fcd34d; }
 
 /* ── Setup ── */
 .setup-hero { text-align: center; padding: 32px 16px 20px; }
-.setup-hero .emoji { font-size: 48px; margin-bottom: 10px; }
-.setup-hero h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
-.setup-hero p { font-size: 13px; color: var(--txt2); line-height: 1.6; }
-.step-row { display: flex; gap: 14px; margin-bottom: 12px; align-items: flex-start; }
+.setup-hero .emoji { font-size: 44px; margin-bottom: 10px; }
+.setup-hero h2 { font-size: 22px; font-weight: 600; margin-bottom: 6px; letter-spacing: -.3px; }
+.setup-hero p  { font-size: 14px; color: var(--steel); line-height: 1.6; }
+.step-row { display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-start; }
 .step-dot {
-  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
-  background: linear-gradient(135deg, var(--p1), var(--p2));
-  color: white; font-size: 12px; font-weight: 700;
+  width: 24px; height: 24px; border-radius: var(--r-full); flex-shrink: 0;
+  background: var(--primary); color: white;
+  font-size: 12px; font-weight: 600;
   display: flex; align-items: center; justify-content: center; margin-top: 1px;
 }
-.step-row p { font-size: 14px; line-height: 1.6; color: var(--txt); }
-.step-row a { color: var(--p1); }
+.step-row p { font-size: 14px; line-height: 1.6; color: var(--charcoal); }
+.step-row a { color: var(--link-blue); text-decoration: none; }
+.step-row a:hover { text-decoration: underline; }
 
-/* ── Home header ── */
+/* ── List header ── */
 .list-header {
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 16px;
 }
-.list-header h2 { font-size: 18px; font-weight: 700; }
+.list-header h2 { font-size: 18px; font-weight: 600; letter-spacing: -.3px; color: var(--ink); }
 
 /* ── Member panel ── */
-.member-panel {
-  background: var(--card); border-radius: var(--r);
-  box-shadow: var(--sh); border: 1px solid var(--border);
-  margin-bottom: 16px; overflow: hidden;
-}
+.member-panel { background: var(--canvas); border-radius: var(--r-lg); border: 1px solid var(--hairline); margin-bottom: 12px; overflow: hidden; }
 .member-panel-toggle {
   width: 100%; display: flex; align-items: center; gap: 12px;
-  padding: 18px 22px; background: none; border: none; cursor: pointer;
+  padding: 16px 20px; background: none; border: none; cursor: pointer;
   font-family: inherit; text-align: left;
 }
-.member-panel-toggle:hover { background: var(--bg); }
-.member-panel-toggle .icon {
-  width: 36px; height: 36px; border-radius: 10px;
-  background: linear-gradient(135deg, var(--p1), var(--p2));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; flex-shrink: 0;
-}
-.member-panel-toggle .label { flex: 1; font-size: 15px; font-weight: 700; color: var(--txt); }
-.member-panel-toggle .arrow { color: var(--txt3); font-size: 18px; transition: transform .2s; }
+.member-panel-toggle:hover { background: var(--surface); }
+.member-panel-toggle .icon { width: 32px; height: 32px; border-radius: var(--r-sm); background: var(--tint-lavender); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+.member-panel-toggle .label { flex: 1; font-size: 14px; font-weight: 500; color: var(--charcoal); }
+.member-panel-toggle .arrow { color: var(--stone); font-size: 16px; transition: transform .2s; }
 .member-panel-toggle.open .arrow { transform: rotate(90deg); }
-.member-panel-body { display: none; padding: 0 22px 20px; border-top: 1px solid var(--border); }
+.member-panel-body { display: none; padding: 0 20px 18px; border-top: 1px solid var(--hairline-soft); }
 .member-panel-body.open { display: block; }
 
-/* ── Empty ── */
-.empty {
-  text-align: center; padding: 40px 20px;
-  color: var(--txt3); font-size: 14px; line-height: 1.8;
-}
-.empty .big { font-size: 40px; margin-bottom: 10px; }
-
-/* ── Best date banner ── */
+/* ── Best date banner (Notion purple) ── */
 .best-date-banner {
-  background: linear-gradient(135deg, #3a8a6a, #5ec49a);
-  border-radius: var(--r2); padding: 16px 20px;
+  background: var(--primary);
+  border-radius: var(--r-lg); padding: 16px 20px;
   color: white; margin-bottom: 16px;
   display: flex; align-items: center; gap: 14px;
-  box-shadow: 0 4px 16px rgba(58,138,106,.3);
+  box-shadow: 0 4px 14px rgba(110,87,224,.35);
 }
-.best-date-banner .crown { font-size: 28px; flex-shrink: 0; }
-.best-date-banner .label { font-size: 11px; opacity: .8; margin-bottom: 2px; font-weight: 600; letter-spacing: .05em; }
-.best-date-banner .value { font-size: 17px; font-weight: 700; }
+.best-date-banner .crown { font-size: 24px; flex-shrink: 0; }
+.best-date-banner .label { font-size: 11px; font-weight: 600; letter-spacing: .05em; margin-bottom: 2px; color: rgba(255,255,255,.75); text-transform: uppercase; }
+.best-date-banner .value { font-size: 16px; font-weight: 600; color: white; }
 .best-date-banner .count { margin-left: auto; text-align: center; flex-shrink: 0; }
-.best-date-banner .count-num { font-size: 28px; font-weight: 900; line-height: 1; }
-.best-date-banner .count-label { font-size: 11px; opacity: .8; }
+.best-date-banner .count-num { font-size: 26px; font-weight: 700; line-height: 1; color: white; }
+.best-date-banner .count-label { font-size: 11px; font-weight: 500; color: rgba(255,255,255,.75); }
 
-/* ── Member tag (removable) ── */
+/* ── Member tag ── */
 .member-tag {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: var(--p-light); color: var(--p1);
-  border: 1px solid var(--p3);
-  border-radius: 20px; padding: 5px 14px;
-  font-size: 13px; font-weight: 500;
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--tint-lavender); color: var(--primary);
+  border-radius: var(--r-xs); padding: 4px 10px;
+  font-size: 13px; font-weight: 500; border: 1px solid var(--p3);
 }
-.member-tag .rm {
-  cursor: pointer; opacity: .5; font-size: 15px;
-  border: none; background: none; color: inherit; padding: 0;
-}
+.member-tag .rm { cursor: pointer; opacity: .5; font-size: 14px; border: none; background: none; color: inherit; padding: 0; }
 .member-tag .rm:hover { opacity: 1; }
 
 /* ── Toast ── */
 .toast {
-  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
-  background: var(--txt); color: white;
-  padding: 11px 22px; border-radius: 30px;
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--ink-deep); color: white;
+  padding: 10px 20px; border-radius: var(--r-full);
   font-size: 13px; font-weight: 500;
-  box-shadow: var(--sh2); z-index: 300;
-  animation: toastIn .25s ease;
+  box-shadow: var(--sh-4); z-index: 300;
+  animation: toastIn .2s ease;
 }
-@keyframes toastIn { from { opacity:0; transform: translateX(-50%) translateY(10px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
+@keyframes toastIn { from { opacity:0; transform: translateX(-50%) translateY(8px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
 
-@media(max-width:480px) {
-  .hero { padding: 24px 16px 44px; }
-  .content-wrap { padding: 0 12px 50px; }
+/* ── Meeting list items ── */
+.meeting-list-item {
+  background: var(--canvas); border-radius: var(--r-lg);
+  border: 1px solid var(--hairline); margin-bottom: 12px;
+  overflow: hidden; box-shadow: var(--sh-1);
+  transition: box-shadow .15s;
+}
+.meeting-list-item:hover { box-shadow: var(--sh-2); border-color: var(--primary); }
+
+/* ── Empty state ── */
+.empty-state { text-align: center; padding: 48px 20px; color: var(--stone); font-size: 14px; line-height: 1.8; }
+
+/* ── Promo-style badge ── */
+.badge {
+  display: inline-block; padding: 3px 10px; border-radius: var(--r-full);
+  font-size: 12px; font-weight: 600;
+}
+.badge-purple { background: var(--primary); color: white; }
+.badge-mint   { background: var(--tint-mint); color: var(--success); }
+
+@media(max-width:768px) {
+  #homeBar { padding: 0 16px; }
+  .hero { padding: 32px 16px 48px; }
+  .hero-title { font-size: 22px; }
+  .content-wrap { padding: 16px 16px 48px; }
   .card { padding: 18px; }
-  .name-grid { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+  .name-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+}
+@media(max-width:480px) {
   .hero-title { font-size: 18px; }
+  .content-wrap { padding: 14px 12px 40px; }
 }
 </style>
 </head>
@@ -427,23 +429,22 @@ textarea { resize: vertical; min-height: 80px; }
   <span>불러오는 중...</span>
 </div>
 
-<!-- HERO -->
-<!-- 홈 전용 상단바 -->
-<div id="homeBar" style="background:linear-gradient(135deg,#4e2e98,#7c5cbf);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;box-shadow:0 2px 12px rgba(100,70,160,.25);">
-  <div style="display:flex;align-items:center;gap:10px">
-    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:5px 14px;display:flex;flex-direction:column;align-items:center;line-height:1.2">
-      <span style="font-size:9px;font-weight:900;letter-spacing:3px;color:rgba(255,255,255,.7)">MEET</span>
-      <span style="font-size:14px;font-weight:900;letter-spacing:1px;color:white">ING</span>
+<!-- 홈 상단 내비게이션 -->
+<div id="homeBar" style="display:flex">
+  <div class="nav-logo">
+    <div class="nav-logo-badge">
+      <span class="top">MEET</span>
+      <span class="bot">ING</span>
     </div>
-    <span style="color:white;font-size:15px;font-weight:600">회의일정수립</span>
+    <span class="nav-title">회의일정수립</span>
   </div>
-  <button onclick="showSetup()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:white;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:14px">⚙</button>
+  <button onclick="showSetup()" style="background:var(--surface);border:1px solid var(--hairline-strong);color:var(--slate);padding:6px 14px;border-radius:var(--r-md);cursor:pointer;font-family:inherit;font-size:13px;font-weight:500">⚙ 설정</button>
 </div>
 
-<!-- 모임 전용 히어로 -->
-<div class="hero" id="hero" style="display:none">
-  <button class="hero-back" id="backBtn" onclick="goBack()" style="display:none">←</button>
-  <div style="position:absolute;right:12px;top:14px;display:flex;gap:6px;z-index:2">
+<!-- 모임 상세 히어로 (Notion navy band) -->
+<div class="hero" id="hero">
+  <button class="hero-back" id="backBtn" onclick="goBack()" style="display:none">← 목록</button>
+  <div style="position:absolute;right:20px;top:16px;display:flex;gap:8px;z-index:2">
     <button class="hero-settings" id="memberBtn" onclick="toggleMemberModal()" style="display:none" title="멤버 관리">👥</button>
     <button class="hero-settings" id="adminBtn" onclick="promptAdminPin()" style="display:none" title="관리자">🔒</button>
   </div>
@@ -458,11 +459,11 @@ textarea { resize: vertical; min-height: 80px; }
 </div>
 
 <!-- 멤버 관리 모달 -->
-<div id="memberModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:150;align-items:flex-end;justify-content:center;">
-  <div style="background:white;border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:680px;max-height:70vh;overflow-y:auto;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <div style="font-size:16px;font-weight:700">👥 멤버 관리</div>
-      <button onclick="toggleMemberModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--txt3)">×</button>
+<div id="memberModal" style="display:none;position:fixed;inset:0;background:rgba(15,15,15,.5);z-index:150;align-items:flex-end;justify-content:center;">
+  <div style="background:var(--canvas);border-radius:var(--r-xl) var(--r-xl) 0 0;padding:24px;width:100%;max-width:680px;max-height:70vh;overflow-y:auto;box-shadow:var(--sh-4);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--hairline)">
+      <div style="font-size:16px;font-weight:600;color:var(--charcoal)">멤버 관리</div>
+      <button onclick="toggleMemberModal()" style="background:var(--surface);border:1px solid var(--hairline);color:var(--steel);font-size:18px;cursor:pointer;padding:4px 10px;border-radius:var(--r-md)">×</button>
     </div>
     <div class="input-row" style="margin-bottom:12px">
       <input type="text" id="newMemberName" placeholder="이름 입력" onkeydown="if(event.key==='Enter')addMember()">
@@ -535,12 +536,11 @@ function showHero() {
   const hb = document.getElementById('homeBar');
   const hero = document.getElementById('hero');
   if (hb) hb.style.display = 'none';
-  if (hero) hero.style.display = '';
+  if (hero) hero.style.display = 'block';
 }
 function setHero(title, sub, back, logoTitle) {
   document.getElementById('heroTitle').textContent = title;
   document.getElementById('heroSub').innerHTML = sub || '';
-  // 뒤로가기는 PIN 인증(관리자 모드) 활성화 시에만 표시
   if (logoTitle !== undefined) {
     const parts = logoTitle ? logoTitle.split(/[-\s]/) : ['FNL','PRAISE'];
     const top = parts[0] || 'FNL';
@@ -555,7 +555,7 @@ function setHeroHTML(title, sub, back) { setHero(title, sub, back); }
 function showSetup() { location.hash = '#setup'; }
 function showSetupView() {
   currentView = 'setup';
-  setHero('Firebase 설정', '데이터 연결 구성', !!db);
+  showHomeBar();
   const saved = JSON.parse(localStorage.getItem('fbConfig') || '{}');
   render(`
     <div class="setup-hero">
@@ -601,30 +601,37 @@ function showHome() {
     snap.forEach(c => list.unshift({ id: c.key, ...c.val() }));
     let html = '';
     if (!list.length) {
-      html = `<div style="text-align:center;padding:32px 0;color:var(--txt3);font-size:14px;">아직 등록된 모임이 없습니다.</div>`;
+      html = `<div class="empty-state">
+        <div style="font-size:36px;margin-bottom:12px">📅</div>
+        <div style="font-size:16px;font-weight:500;color:var(--charcoal);margin-bottom:6px">아직 등록된 모임이 없습니다</div>
+        <div style="color:var(--stone)">새 모임을 만들어보세요</div>
+      </div>`;
     } else {
-      html = list.map(m => {
+      const tints = ['var(--tint-lavender)','var(--tint-mint)','var(--tint-sky)','var(--tint-peach)','var(--tint-rose)','var(--tint-yellow)'];
+      html = list.map((m, i) => {
         const dc = m.dates ? Object.keys(m.dates).length : 0;
         const rc = m.responses ? Object.keys(m.responses).length : 0;
         const shareUrl = location.href.split('#')[0] + '#meeting/' + m.id;
-        return `<div style="background:white;border-radius:12px;border:1px solid var(--border);margin-bottom:10px;overflow:hidden">
-          <div style="display:flex;align-items:center;padding:14px 16px;cursor:pointer;transition:all .15s;" onclick="location.hash='#meeting/${m.id}'" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='white'">
-            <div style="flex:1">
-              <div style="font-weight:700;font-size:15px;color:var(--txt)">${esc(m.title)}</div>
-              <div style="font-size:12px;color:var(--txt3);margin-top:3px">일정 ${dc}개 · 응답 ${rc}명</div>
+        const tint = tints[i % tints.length];
+        return `<div class="meeting-list-item">
+          <div style="display:flex;align-items:center;padding:16px 20px;cursor:pointer;gap:14px" onclick="location.hash='#meeting/${m.id}'">
+            <div style="width:40px;height:40px;border-radius:var(--r-md);background:${tint};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📋</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600;font-size:15px;color:var(--charcoal)">${esc(m.title)}</div>
+              <div style="font-size:12px;color:var(--stone);margin-top:3px">일정 ${dc}개 · 응답 ${rc}명</div>
             </div>
-            <div style="color:var(--p3);font-size:20px">›</div>
+            <div style="color:var(--stone);font-size:18px">›</div>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-top:1px solid var(--border);background:var(--bg)">
-            <span style="font-size:12px;color:var(--txt3);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(shareUrl)}</span>
-            <button onclick="event.stopPropagation();copyUrl('${esc(shareUrl)}')" style="background:linear-gradient(135deg,var(--p1),var(--p2));color:white;border:none;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;font-family:inherit">링크 복사</button>
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 20px;border-top:1px solid var(--hairline-soft);background:var(--surface)">
+            <span style="font-size:11px;color:var(--stone);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(shareUrl)}</span>
+            <button onclick="event.stopPropagation();copyUrl('${esc(shareUrl)}')" class="btn btn-primary btn-sm">링크 복사</button>
           </div>
         </div>`;
       }).join('');
     }
     render(`
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <div style="font-size:16px;font-weight:700;color:var(--txt)">모임 목록</div>
+      <div class="list-header">
+        <h2>모임 목록</h2>
         <button class="btn btn-primary btn-sm" onclick="location.hash='#create'">+ 새 모임</button>
       </div>
       ${html}
@@ -642,10 +649,14 @@ function showCreate() {
   currentView = 'create'; newDates = []; newAttendees = []; newAgendaItems = []; newFiles = [];
   showHomeBar();
   render(`
+    <div style="margin-bottom:20px">
+      <div style="font-size:22px;font-weight:600;letter-spacing:-.3px;color:var(--charcoal);margin-bottom:4px">새 모임 만들기</div>
+      <div style="font-size:14px;color:var(--steel)">일정과 참석자를 입력하세요</div>
+    </div>
     <div class="card">
       <div class="step-head"><div class="step-num-badge">1</div><div><div class="step-title">기본 정보</div></div></div>
       <div class="form-group"><label>모임 이름 (로고에 표시)</label><input type="text" id="meetingLogoTitle" placeholder="예: FNL-PRAISE" value="FNL-PRAISE"></div>
-      <div class="form-group"><label>모임 부제 (로고 아래 설명)</label><textarea id="meetingLogoSub" placeholder="예: 금요일 찬양팀 정기모임" rows="2">금요일작은찬양팀 정기모임</textarea></div>
+      <div class="form-group"><label>모임 부제</label><textarea id="meetingLogoSub" placeholder="예: 금요일 찬양팀 정기모임" rows="2">금요일작은찬양팀 정기모임</textarea></div>
       <div class="form-group"><label>회의 제목</label><input type="text" id="meetingTitle" placeholder="예: 5월 정기 팀 회의"></div>
       <div class="form-group"><label>설명 (선택)</label><textarea id="meetingDesc" placeholder="회의 안건, 장소 등 추가 정보"></textarea></div>
       <div class="form-group"><label>주최자 PIN (기본정보 수정 시 필요)</label><input type="text" id="meetingPin" placeholder="숫자 4자리 예: 1234" maxlength="8"></div>
@@ -671,10 +682,10 @@ function showCreate() {
       <div class="step-head"><div class="step-num-badge">4</div><div><div class="step-title">회의 내용</div><div class="step-sub">안건, 자료 등 내용을 추가하세요</div></div></div>
       <div id="agendaList" style="margin-bottom:12px"></div>
       <button class="btn btn-secondary btn-sm" onclick="addAgendaItem()" style="margin-bottom:16px">+ 항목 추가</button>
-      <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px">
-        <label style="margin-bottom:8px;display:block">📎 파일 첨부 <span style="font-weight:400;color:var(--txt3);font-size:12px">(10MB 이하 권장)</span></label>
+      <div style="border-top:1px solid var(--hairline-soft);padding-top:14px">
+        <label style="margin-bottom:8px;display:block">📎 파일 첨부 <span style="font-weight:400;color:var(--stone);font-size:12px">(10MB 이하 권장)</span></label>
         <div id="fileList" style="margin-bottom:10px"></div>
-        <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;background:var(--bg);border:1.5px dashed var(--border2);border-radius:var(--r2);padding:10px 16px;font-size:13px;color:var(--txt2)">
+        <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;background:var(--surface);border:1.5px dashed var(--hairline-strong);border-radius:var(--r-md);padding:10px 16px;font-size:13px;color:var(--steel)">
           <span>📁 파일 선택</span>
           <input type="file" id="fileInput" multiple style="display:none" onchange="handleFileSelect(this)">
         </label>
@@ -724,7 +735,6 @@ function createMeeting() {
   const dObj = {}, aObj = {};
   newDates.forEach((d,i) => dObj['d'+i] = d);
   newAttendees.forEach((n,i) => aObj['a'+i] = n);
-  // 회의 내용 수집
   const agendaObj = {};
   newAgendaItems.forEach((item,i) => { agendaObj['ag'+i] = item; });
   const filesObj = {};
@@ -737,40 +747,32 @@ function createMeeting() {
 
 // ── 회의 내용 & 파일 ─────────────────────────────────────────
 let newAgendaItems = [], newFiles = [];
-
-function addAgendaItem() {
-  newAgendaItems.push({ title: '', content: '' });
-  renderAgendaList();
-}
+function addAgendaItem() { newAgendaItems.push({ title: '', content: '' }); renderAgendaList(); }
 function removeAgendaItem(i) { newAgendaItems.splice(i, 1); renderAgendaList(); }
 function renderAgendaList() {
   const el = document.getElementById('agendaList');
   if (!el) return;
   el.innerHTML = newAgendaItems.map((item, i) => `
-    <div style="background:var(--bg);border-radius:var(--r2);padding:12px;margin-bottom:10px;border:1px solid var(--border)">
+    <div style="background:var(--surface);border-radius:var(--r-md);padding:12px;margin-bottom:10px;border:1px solid var(--hairline)">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <span style="font-size:12px;font-weight:700;color:var(--txt3)">항목 ${i+1}</span>
-        <button onclick="removeAgendaItem(${i})" style="margin-left:auto;background:none;border:none;color:var(--txt3);cursor:pointer;font-size:16px">×</button>
+        <span style="font-size:12px;font-weight:500;color:var(--stone)">항목 ${i+1}</span>
+        <button onclick="removeAgendaItem(${i})" style="margin-left:auto;background:none;border:none;color:var(--stone);cursor:pointer;font-size:16px">×</button>
       </div>
       <input type="text" placeholder="제목 (예: 선곡 논의)" value="${esc(item.title)}"
         oninput="newAgendaItems[${i}].title=this.value"
-        style="margin-bottom:8px;width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:white">
+        style="margin-bottom:8px;width:100%;padding:8px 12px;border:1px solid var(--hairline-strong);border-radius:var(--r-md);font-size:13px;font-family:inherit;background:white;height:auto">
       <textarea placeholder="내용 (선택)" rows="2"
         oninput="newAgendaItems[${i}].content=this.value"
-        style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;background:white">${esc(item.content)}</textarea>
+        style="width:100%;padding:8px 12px;border:1px solid var(--hairline-strong);border-radius:var(--r-md);font-size:13px;font-family:inherit;resize:vertical;background:white">${esc(item.content)}</textarea>
     </div>
   `).join('');
 }
-
 function handleFileSelect(input) {
   const files = Array.from(input.files);
   files.forEach(file => {
-    if (file.size > 10 * 1024 * 1024) { showToast(file.name + ' — 10MB 초과, 건너뜁니다.'); return; }
+    if (file.size > 10 * 1024 * 1024) { showToast(file.name + ' — 10MB 초과'); return; }
     const reader = new FileReader();
-    reader.onload = e => {
-      newFiles.push({ name: file.name, data: e.target.result, type: file.type, size: file.size });
-      renderFileList();
-    };
+    reader.onload = e => { newFiles.push({ name: file.name, data: e.target.result, type: file.type, size: file.size }); renderFileList(); };
     reader.readAsDataURL(file);
   });
   input.value = '';
@@ -780,20 +782,19 @@ function renderFileList() {
   const el = document.getElementById('fileList');
   if (!el) return;
   el.innerHTML = newFiles.map((f, i) => `
-    <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--p-light);border-radius:8px;margin-bottom:6px;border:1px solid var(--p3)">
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--tint-lavender);border-radius:var(--r-md);margin-bottom:6px;border:1px solid var(--p3)">
       <span style="font-size:14px">${fileIcon(f.type)}</span>
-      <span style="font-size:13px;color:var(--p1);font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(f.name)}</span>
-      <span style="font-size:11px;color:var(--txt3)">${(f.size/1024).toFixed(0)}KB</span>
-      <button onclick="removeFile(${i})" style="background:none;border:none;color:var(--txt3);cursor:pointer;font-size:15px">×</button>
-    </div>
-  `).join('');
+      <span style="font-size:13px;color:var(--primary);font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(f.name)}</span>
+      <span style="font-size:11px;color:var(--stone)">${(f.size/1024).toFixed(0)}KB</span>
+      <button onclick="removeFile(${i})" style="background:none;border:none;color:var(--stone);cursor:pointer;font-size:15px">×</button>
+    </div>`).join('');
 }
 function fileIcon(type) {
+  if (!type) return '📎';
   if (type.includes('image')) return '🖼️';
   if (type.includes('pdf')) return '📄';
   if (type.includes('word') || type.includes('document')) return '📝';
   if (type.includes('sheet') || type.includes('excel')) return '📊';
-  if (type.includes('presentation') || type.includes('powerpoint')) return '📊';
   return '📎';
 }
 
@@ -802,7 +803,6 @@ let meetingData = null, responseListener = null;
 function showMeeting(id) {
   if (!db) { showSetupView(); return; }
   currentView = 'meeting'; currentMeetingId = id; currentUser = null;
-  setHero('불러오는 중...', '', true);
   showLoading('회의 정보 로딩 중...');
   if (responseListener) { db.ref('meetings/'+id+'/responses').off(); responseListener = null; }
   db.ref('meetings/'+id).once('value').then(snap => {
@@ -819,28 +819,29 @@ function renderMeetingView() {
   const m = meetingData;
   const dates = m.dates ? Object.entries(m.dates).sort((a,b) => a[1].date.localeCompare(b[1].date)) : [];
   const attendees = m.attendees ? Object.values(m.attendees) : [];
-  const shareUrl = location.href.split('#')[0] + '#meeting/' + m.id;
 
   render(`
-    <!-- 회의 내용 (있을 때만 표시) -->
-    ${(m.agenda && Object.keys(m.agenda).length) || (m.files && Object.keys(m.files).length) ? `
-    <div class="card">
-      <div class="step-head"><div class="step-num-badge">📋</div><div><div class="step-title">회의 내용</div></div></div>
-      ${m.agenda ? Object.values(m.agenda).filter(a=>a.title).map(a=>`
-        <div style="margin-bottom:12px;padding:12px;background:var(--bg);border-radius:var(--r2);border-left:3px solid var(--p2)">
-          <div style="font-weight:700;font-size:14px;margin-bottom:4px;color:var(--txt)">${esc(a.title)}</div>
-          ${a.content ? `<div style="font-size:13px;color:var(--txt2);line-height:1.6">${esc(a.content).replace(/\n/g,'<br>')}</div>` : ''}
+    ${(() => {
+      const hasAgenda = m.agenda && Object.values(m.agenda).filter(a=>a.title).length > 0;
+      const hasFiles = m.files && Object.values(m.files).filter(f=>f.name).length > 0;
+      if (!hasAgenda && !hasFiles) return '';
+      return `<div class="card" style="background:var(--tint-sky)">
+      <div class="step-head"><div class="step-num-badge" style="background:var(--link-blue)">📋</div><div><div class="step-title">회의 내용</div><div class="step-sub">안건 및 첨부 파일</div></div></div>
+      ${hasAgenda ? Object.values(m.agenda).filter(a=>a.title).map(a=>`
+        <div style="margin-bottom:10px;padding:12px;background:white;border-radius:var(--r-md);border-left:3px solid var(--link-blue)">
+          <div style="font-weight:600;font-size:14px;margin-bottom:4px;color:var(--charcoal)">${esc(a.title)}</div>
+          ${a.content ? `<div style="font-size:13px;color:var(--slate);line-height:1.6">${esc(a.content).replace(/\n/g,'<br>')}</div>` : ''}
         </div>`).join('') : ''}
-      ${m.files ? Object.values(m.files).filter(f=>f.name).map(f=>`
-        <a href="${f.data}" download="${esc(f.name)}" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--p-light);border-radius:8px;margin-bottom:6px;border:1px solid var(--p3);text-decoration:none">
+      ${hasFiles ? Object.values(m.files).filter(f=>f.name).map(f=>`
+        <a href="${f.data}" download="${esc(f.name)}" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:white;border-radius:var(--r-md);margin-bottom:6px;border:1px solid var(--hairline);text-decoration:none">
           <span>${fileIcon(f.type||'')}</span>
-          <span style="font-size:13px;color:var(--p1);font-weight:500;flex:1">${esc(f.name)}</span>
-          <span style="font-size:11px;color:var(--txt3)">${(f.size/1024).toFixed(0)}KB</span>
-          <span style="font-size:12px;color:var(--p1)">↓</span>
+          <span style="font-size:13px;color:var(--charcoal);font-weight:500;flex:1">${esc(f.name)}</span>
+          <span style="font-size:11px;color:var(--stone)">${(f.size/1024).toFixed(0)}KB</span>
+          <span style="font-size:12px;color:var(--link-blue)">↓</span>
         </a>`).join('') : ''}
-    </div>` : ''}
+    </div>`;
+    })()}
 
-    <!-- 이름 선택 -->
     <div class="card">
       <div class="step-head"><div class="step-num-badge">1</div><div><div class="step-title">본인을 선택해주세요</div></div></div>
       <div class="name-grid">
@@ -848,10 +849,9 @@ function renderMeetingView() {
       </div>
     </div>
 
-    <!-- 날짜 선택 -->
-    <div class="card" id="responseCard" style="display:none">
+    <div class="card" id="responseCard" style="display:none;background:var(--tint-mint)">
       <div class="step-head">
-        <div class="step-num-badge">2</div>
+        <div class="step-num-badge" style="background:var(--success)">2</div>
         <div>
           <div class="step-title">참석 가능한 날짜를 선택해주세요</div>
           <div class="step-sub" id="selectedNameBadge">여러 날짜 선택 가능</div>
@@ -862,7 +862,6 @@ function renderMeetingView() {
           const parts = d.date ? d.date.split('-') : [];
           const mon = parts[1] ? ['','1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'][parseInt(parts[1])] : '';
           const dayNum = parts[2] ? parseInt(parts[2]) : '';
-          const dowStr = d.date ? (() => { const days=['일','월','화','수','목','금','토']; return days[new Date(d.date+'T00:00:00').getDay()]+'요일'; })() : '';
           return `<div class="date-card" id="opt_${key}" onclick="toggleDate('${key}')">
             <div class="date-cal">
               <div class="date-cal-top">${esc(mon)}</div>
@@ -879,7 +878,6 @@ function renderMeetingView() {
       <button class="btn btn-success btn-full" onclick="submitResponse()">응답 저장하기</button>
     </div>
 
-    <!-- 현황 -->
     <div class="card">
       <div class="step-head">
         <div class="step-num-badge">3</div>
@@ -889,10 +887,8 @@ function renderMeetingView() {
       <div class="grid-wrap" id="summaryGrid"><div style="text-align:center;padding:24px"><div class="spinner" style="margin:0 auto"></div></div></div>
     </div>
 
-    <!-- 최적 날짜 배너 -->
     <div class="best-date-banner" id="bestDateBanner" style="display:none"></div>
 
-    <!-- 기본정보 수정 (PIN 인증 후 표시) -->
     <div id="adminPanel" style="display:none">
       <div class="member-panel">
         <button class="member-panel-toggle" id="editToggle" onclick="toggleEditPanel()">
@@ -912,9 +908,8 @@ function renderMeetingView() {
       </div>
     </div>
 
-
-    <div style="text-align:center;margin-bottom:20px">
-      <button class="btn btn-danger btn-sm" onclick="deleteMeeting()">이 모임 삭제</button>
+    <div style="text-align:center;margin-bottom:24px">
+      <button class="btn btn-secondary btn-sm" style="color:var(--error);border-color:var(--error)" onclick="deleteMeeting()">이 모임 삭제</button>
     </div>
   `);
   loadSummary();
@@ -974,51 +969,30 @@ function loadSummary() {
     }).join('');
     const el = document.getElementById('summaryGrid');
     if (el) el.innerHTML = `<table class="grid"><thead><tr><th>이름</th>${dates.map(([k,d])=>`<th>${esc(addDow(d.date)||d.label)}${d.time?'<br><span style="font-weight:400;font-size:11px">'+esc(d.time)+'</span>':''}</th>`).join('')}</tr></thead><tbody>${rows}<tr class="count-row"><td>가능 인원</td>${dates.map(([k])=>`<td>${counts[k]}명</td>`).join('')}</tr></tbody></table>`;
-
-    // 최적 날짜 배너
     const maxCount = Math.max(...Object.values(counts), 0);
     const bestKey = dates.find(([k]) => counts[k] === maxCount);
     const bannerEl = document.getElementById('bestDateBanner');
     if (bannerEl && bestKey && maxCount > 0) {
       const bd = bestKey[1];
       bannerEl.style.display = 'flex';
-      bannerEl.innerHTML = `
-        <div class="crown">🏆</div>
-        <div>
-          <div class="label">가장 많이 가능한 날짜</div>
-          <div class="value">${esc(addDow(bd.date)||bd.label)}${bd.time?' · '+esc(bd.time):''}</div>
-        </div>
-        <div class="count">
-          <div class="count-num">${maxCount}</div>
-          <div class="count-label">명 가능</div>
-        </div>`;
-    } else if (bannerEl) {
-      bannerEl.style.display = 'none';
-    }
+      bannerEl.innerHTML = `<div class="crown">🏆</div><div><div class="label">가장 많이 가능한 날짜</div><div class="value">${esc(addDow(bd.date)||bd.label)}${bd.time?' · '+esc(bd.time):''}</div></div><div class="count"><div class="count-num">${maxCount}</div><div class="count-label">명 가능</div></div>`;
+    } else if (bannerEl) { bannerEl.style.display = 'none'; }
   });
 }
 
-// ── 기본정보 수정 (주최자 PIN 인증) ──────────────────────────
 function promptAdminPin() {
   const pin = prompt('주최자 PIN을 입력하세요:');
   if (pin === null) return;
   if (pin === String(meetingData.pin)) {
     const panel = document.getElementById('adminPanel');
-    if (panel) {
-      panel.style.display = '';
-      panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    // 뒤로가기 버튼 활성화 + 잠금 해제 표시
+    if (panel) { panel.style.display = ''; panel.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
     const backBtn = document.getElementById('backBtn');
     if (backBtn) backBtn.style.display = 'flex';
     const adminBtn = document.getElementById('adminBtn');
     if (adminBtn) adminBtn.textContent = '🔓';
     showToast('관리자 모드 활성화');
-  } else {
-    alert('PIN이 올바르지 않습니다.');
-  }
+  } else { alert('PIN이 올바르지 않습니다.'); }
 }
-
 function toggleEditPanel() {
   const toggle = document.getElementById('editToggle');
   const body = document.getElementById('editPanelBody');
@@ -1027,7 +1001,6 @@ function toggleEditPanel() {
   toggle.classList.toggle('open', !isOpen);
   body.classList.toggle('open', !isOpen);
 }
-
 function saveEditInfo() {
   const logoTitle = v('editLogoTitle').trim();
   const logoSub = v('editLogoSub').trim();
@@ -1036,47 +1009,38 @@ function saveEditInfo() {
   if (!title) { alert('모임 제목을 입력하세요.'); return; }
   showLoading('저장 중...');
   db.ref('meetings/'+currentMeetingId).update({ logoTitle, logoSub, title, desc }).then(() => {
-    // 데이터 업데이트
-    meetingData.logoTitle = logoTitle;
-    meetingData.logoSub = logoSub;
-    meetingData.title = title;
-    meetingData.desc = desc;
-    // 헤로 즉시 반영
+    meetingData.logoTitle = logoTitle; meetingData.logoSub = logoSub;
+    meetingData.title = title; meetingData.desc = desc;
     updateHeroFromData();
     hideLoading();
     showToast('저장되었습니다! ✓');
   }).catch(err => { hideLoading(); alert('오류: ' + err.message); });
 }
-
 function updateHeroFromData() {
   const logoTitle = meetingData.logoTitle || 'FNL-PRAISE';
-  // 로고 배지 업데이트
   const parts = logoTitle.split(/[-\s]/);
   const top = parts[0] || 'FNL';
   const bot = parts.slice(1).join(' ') || logoTitle;
-  const logoFnl = document.getElementById('logoFnl');
-  const logoPraise = document.getElementById('logoPraise');
-  if (logoFnl) logoFnl.textContent = top;
-  if (logoPraise) logoPraise.textContent = bot;
-  // 헤로 타이틀 = 로고 부제, 헤로 서브 = 설명
-  const heroTitleEl = document.getElementById('heroTitle');
-  const heroSubEl = document.getElementById('heroSub');
-  if (heroTitleEl) heroTitleEl.textContent = meetingData.logoSub || meetingData.title || '';
-  if (heroSubEl) heroSubEl.innerHTML = meetingData.desc ? meetingData.desc.replace(/\n/g,'<br>') : '';
+  const lf = document.getElementById('logoFnl');
+  const lp = document.getElementById('logoPraise');
+  if (lf) lf.textContent = top;
+  if (lp) lp.textContent = bot;
+  const ht = document.getElementById('heroTitle');
+  const hs = document.getElementById('heroSub');
+  if (ht) ht.textContent = meetingData.logoSub || meetingData.title || '';
+  if (hs) hs.innerHTML = meetingData.desc ? meetingData.desc.replace(/\n/g,'<br>') : '';
   const ab = document.getElementById('adminBtn');
   const mb = document.getElementById('memberBtn');
   if (ab) ab.style.display = meetingData.pin ? '' : 'none';
   if (mb) mb.style.display = '';
 }
 
-// ── 멤버 관리 (모달) ─────────────────────────────────────────
 function toggleMemberModal() {
   const modal = document.getElementById('memberModal');
   const isOpen = modal.style.display === 'flex';
   modal.style.display = isOpen ? 'none' : 'flex';
   if (!isOpen) renderMemberTags();
 }
-
 function addMember() {
   const name = v('newMemberName').trim();
   if (!name) return;
@@ -1088,15 +1052,12 @@ function addMember() {
     meetingData.attendees[newKey] = name;
     document.getElementById('newMemberName').value = '';
     renderMemberTags();
-    // 이름 선택 버튼도 갱신
     const ng = document.querySelector('.name-grid');
     if (ng) ng.innerHTML = Object.values(meetingData.attendees).map(n =>
-      `<button class="name-btn${currentUser===n?' selected':''}" onclick="selectUser('${esc(n)}')">${esc(n)}</button>`
-    ).join('');
+      `<button class="name-btn${currentUser===n?' selected':''}" onclick="selectUser('${esc(n)}')">${esc(n)}</button>`).join('');
     showToast(name + ' 님이 추가되었습니다!');
   });
 }
-
 function removeMember(key) {
   const name = meetingData.attendees[key];
   if (!confirm(name + ' 님을 삭제할까요?')) return;
@@ -1105,18 +1066,15 @@ function removeMember(key) {
     renderMemberTags();
     const ng = document.querySelector('.name-grid');
     if (ng) ng.innerHTML = Object.values(meetingData.attendees).map(n =>
-      `<button class="name-btn${currentUser===n?' selected':''}" onclick="selectUser('${esc(n)}')">${esc(n)}</button>`
-    ).join('');
+      `<button class="name-btn${currentUser===n?' selected':''}" onclick="selectUser('${esc(n)}')">${esc(n)}</button>`).join('');
     showToast(name + ' 님이 삭제되었습니다.');
   });
 }
-
 function renderMemberTags() {
   const el = document.getElementById('memberTagList');
   if (!el || !meetingData.attendees) return;
   el.innerHTML = Object.entries(meetingData.attendees).map(([k, n]) =>
-    `<span class="member-tag">${esc(n)}<button class="rm" onclick="removeMember('${k}')">×</button></span>`
-  ).join('');
+    `<span class="member-tag">${esc(n)}<button class="rm" onclick="removeMember('${k}')">×</button></span>`).join('');
 }
 function deleteMeeting() {
   if (!confirm('이 회의를 삭제하시겠습니까?')) return;
