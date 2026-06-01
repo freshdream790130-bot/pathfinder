@@ -442,7 +442,7 @@ textarea { resize: vertical; min-height: 80px; }
 
 <!-- 모임 전용 히어로 -->
 <div class="hero" id="hero" style="display:none">
-  <button class="hero-back" id="backBtn" onclick="goBack()">←</button>
+  <button class="hero-back" id="backBtn" onclick="goBack()" style="display:none">←</button>
   <div style="position:absolute;right:12px;top:14px;display:flex;gap:6px;z-index:2">
     <button class="hero-settings" id="memberBtn" onclick="toggleMemberModal()" style="display:none" title="멤버 관리">👥</button>
     <button class="hero-settings" id="adminBtn" onclick="promptAdminPin()" style="display:none" title="관리자">🔒</button>
@@ -540,7 +540,7 @@ function showHero() {
 function setHero(title, sub, back, logoTitle) {
   document.getElementById('heroTitle').textContent = title;
   document.getElementById('heroSub').innerHTML = sub || '';
-  document.getElementById('backBtn').style.display = back ? 'flex' : 'none';
+  // 뒤로가기는 PIN 인증(관리자 모드) 활성화 시에만 표시
   if (logoTitle !== undefined) {
     const parts = logoTitle ? logoTitle.split(/[-\s]/) : ['FNL','PRAISE'];
     const top = parts[0] || 'FNL';
@@ -1008,7 +1008,9 @@ function promptAdminPin() {
       panel.style.display = '';
       panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-    // 버튼 잠금 해제 표시
+    // 뒤로가기 버튼 활성화 + 잠금 해제 표시
+    const backBtn = document.getElementById('backBtn');
+    if (backBtn) backBtn.style.display = 'flex';
     const adminBtn = document.getElementById('adminBtn');
     if (adminBtn) adminBtn.textContent = '🔓';
     showToast('관리자 모드 활성화');
