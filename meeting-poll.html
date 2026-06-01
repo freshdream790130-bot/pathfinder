@@ -870,18 +870,26 @@ function showToast(msg) {
 }
 
 // ─── Boot ─────────────────────────────────────────────────────
+const HARDCODED_CONFIG = {
+  apiKey: "AIzaSyByLFBvtwG8eEID4h0NdLgeJUdFyTxrqGE",
+  authDomain: "fnl-praise.firebaseapp.com",
+  databaseURL: "https://fnl-praise-default-rtdb.firebaseio.com",
+  projectId: "fnl-praise",
+  storageBucket: "fnl-praise.firebasestorage.app",
+  messagingSenderId: "352999506160",
+  appId: "1:352999506160:web:16628134fa08d3e3938235",
+};
+
 (function boot() {
   const saved = localStorage.getItem('fbConfig');
   if (saved) {
     try {
       initFirebase(JSON.parse(saved));
     } catch(e) {
-      hideLoading();
-      showSetupView();
+      initFirebase(HARDCODED_CONFIG);
     }
   } else {
-    hideLoading();
-    showSetupView();
+    initFirebase(HARDCODED_CONFIG);
   }
 })();
 </script>
