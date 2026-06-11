@@ -519,7 +519,7 @@ function goBack() {
 }
 
 // ── Loading ───────────────────────────────────────────────────
-function showLoading(msg) {
+function (msg) {
   document.getElementById('loading').style.display = 'flex';
   document.querySelector('#loading span').textContent = msg || '불러오는 중...';
 }
@@ -585,7 +585,7 @@ function showSetupView() {
 function saveFirebaseConfig() {
   const config = { apiKey:v('fb_apiKey'), authDomain:v('fb_authDomain'), databaseURL:v('fb_databaseURL'), projectId:v('fb_projectId'), storageBucket:v('fb_storageBucket'), messagingSenderId:v('fb_messagingSenderId'), appId:v('fb_appId') };
   if (!config.apiKey || !config.databaseURL) { alert('API Key와 Database URL은 필수입니다.'); return; }
-  showLoading('연결 중...');
+  ('연결 중...');
   initFirebase(config);
 }
 
@@ -594,7 +594,8 @@ function showHome() {
   currentView = 'home'; currentMeetingId = null; currentUser = null;
   showHomeBar();
   if (!db) { showSetupView(); return; }
-  showLoading('불러오는 중...');
+    db.goOffline(); db.goOnline();
+   showLoading('불러오는 중...');
     if (window._homeListener) { db.ref('meetings').off('value', window._homeListener); window._homeListener = null; }
      window._homeListener = db.ref('meetings').on('value', snap => {
     hideLoading();
