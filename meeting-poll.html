@@ -11,7 +11,7 @@
 /* ════════════════════════════════════════
    NOTION DESIGN SYSTEM — Meeting Scheduler
    Inter · Navy hero · Purple CTA · Pastels
-   8px buttons · 12px cards · Soft shadows
+   8px buttons · 12px cards · Soft shadowsh
    ════════════════════════════════════════ */
 :root {
   /* Brand */
@@ -595,7 +595,7 @@ function showHome() {
   showHomeBar();
   if (!db) { showSetupView(); return; }
   showLoading('불러오는 중...');
-  db.ref('meetings').orderByChild('createdAt').once('value').then(snap => {
+  if (window._homeListener) { db.ref('meetings').off('value', window._homeListener); window._homeListener = null; }  window._homeListener = db.ref('meetings').orderByChild('createdAt').on('value', snap => {
     hideLoading();
     const list = [];
     snap.forEach(c => list.unshift({ id: c.key, ...c.val() }));
@@ -636,7 +636,7 @@ function showHome() {
       </div>
       ${html}
     `);
-  }).catch(err => {
+  }, err => {
     hideLoading();
     render(`<div class="alert alert-warn">${err.message.includes('permission') ? 'Firebase 권한 오류 — Realtime Database 규칙을 테스트 모드로 설정하세요.' : '오류: ' + err.message}</div>`);
   });
@@ -812,7 +812,7 @@ function showMeeting(id) {
     showHero();
     updateHeroFromData();
     renderMeetingView();
-  }).catch(err => { hideLoading(); render(`<div class="alert alert-warn">오류: ${err.message}</div>`); });
+  window._homeListener = db.ref hideLoading(); render(`<div class="alert alert-warn">오류: ${err.message}</div>`); });
 }
 
 function renderMeetingView() {
