@@ -595,10 +595,12 @@ function showHome() {
   showHomeBar();
   if (!db) { showSetupView(); return; }
   showLoading('불러오는 중...');
-  if (window._homeListener) { db.ref('meetings').off('value', window._homeListener); window._homeListener = null; }  window._homeListener = db.ref('meetings').orderByChild('createdAt').on('value', snap => {
+    if (window._homeListener) { db.ref('meetings').off('value', window._homeListener); window._homeListener = null; }
+     window._homeListener = db.ref('meetings').on('value', snap => {
     hideLoading();
     const list = [];
-    snap.forEach(c => list.unshift({ id: c.key, ...c.val() }));
+        snap.forEach(c => list.push({ id: c.key, ...c.val() }));
+            list.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
     let html = '';
     if (!list.length) {
       html = `<div class="empty-state">
