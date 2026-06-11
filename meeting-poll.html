@@ -812,7 +812,7 @@ function showMeeting(id) {
     showHero();
     updateHeroFromData();
     renderMeetingView();
-  window._homeListener = db.ref hideLoading(); render(`<div class="alert alert-warn">오류: ${err.message}</div>`); });
+  }).catch(err => { hideLoading(); render(`<div class="alert alert-warn">오류: ${err.message}</div>`); });
 }
 
 function renderMeetingView() {
