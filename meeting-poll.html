@@ -594,55 +594,42 @@ function showHome() {
   currentView = 'home'; currentMeetingId = null; currentUser = null;
   showHomeBar();
   if (!db) { showSetupView(); return; }
-    db.goOffline(); db.goOnline();
-   showLoading('불러오는 중...');
-    if (window._homeListener) { db.ref('meetings').off('value', window._homeListener); window._homeListener = null; }
-     window._homeListener = db.ref('meetings').on('value', snap => {
-    hideLoading();
-    const list = [];
-        snap.forEach(c => list.push({ id: c.key, ...c.val() }));
+      showLoading('불러오는 중...');
+     const _dbUrl = (firebase.app().options.databaseURL || 'https://fnl-praise-default-rtdb.firebaseio.com');
+     fetch(_dbUrl + '/meetings.json').then(r => r.json()).then(data => {
+            hideLoading();
+            if (!data) { render('<div class="empty-state"><div style="font-size:36px;margin-bottom:12px">📅</div><div style="font-size:16px;font-weight:500;color:var(--charcoal);margin-bottom:6px">아직 등록된 모임이 없습니다</div><div style="color:var(--stone)">새 모임을 만들어보세요</div></div>'); return; }
+            const list = Object.entries(data).map(([id, val]) => ({ id, ...val }));
             list.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
-    let html = '';
-    if (!list.length) {
-      html = `<div class="empty-state">
-        <div style="font-size:36px;margin-bottom:12px">📅</div>
-        <div style="font-size:16px;font-weight:500;color:var(--charcoal);margin-bottom:6px">아직 등록된 모임이 없습니다</div>
-        <div style="color:var(--stone)">새 모임을 만들어보세요</div>
-      </div>`;
-    } else {
-      const tints = ['var(--tint-lavender)','var(--tint-mint)','var(--tint-sky)','var(--tint-peach)','var(--tint-rose)','var(--tint-yellow)'];
-      html = list.map((m, i) => {
-        const dc = m.dates ? Object.keys(m.dates).length : 0;
-        const rc = m.responses ? Object.keys(m.responses).length : 0;
-        const shareUrl = location.href.split('#')[0] + '#meeting/' + m.id;
-        const tint = tints[i % tints.length];
-        return `<div class="meeting-list-item">
-          <div style="display:flex;align-items:center;padding:16px 20px;cursor:pointer;gap:14px" onclick="location.hash='#meeting/${m.id}'">
-            <div style="width:40px;height:40px;border-radius:var(--r-md);background:${tint};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📋</div>
-            <div style="flex:1;min-width:0">
-              <div style="font-weight:600;font-size:15px;color:var(--charcoal)">${esc(m.title)}</div>
-              <div style="font-size:12px;color:var(--stone);margin-top:3px">일정 ${dc}개 · 응답 ${rc}명</div>
+            const tints = ['var(--tint-lavender)','var(--tint-mint)','var(--tint-sky)','var(--tint-peach)','var(--tint-rose)','var(--tint-yellow)'];
+            const html = list.map((m, i) => {
+                     const dc = m.dates ? Object.keys(m.dates).length : 0;
+                     const rc = m.responses ? Object.keys(m.responses).length : 0;
+                     const shareUrl = location.href.split('#')[0].split('?')[0] + '#meeting/' + m.id;
+                     const tint = tints[i % tints.length];
+                     return `<div class="meeting-list-item">
+                     <div style="display:flex;align-items:center;padding:16px 20px;cursor:pointer;gap:14px" onclick="location.hash='#meeting/${m.id}'">
+                     <div style="width:40px;height:40px;border-radius:var(--r-md);background:${tint};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📋</div>
+                     <div style="flex:1;min-width:0">
+                     <div style="font-weight:600;font-size:15px;color:var(--charcoal)">${esc(m.title)}</div>
+                     <div style="font-size:12px;color:var(--stone);margin-top:3px">일정 ${dc}개 · 응답 ${rc}명</div>
+                     </div>
+                     <div style="color:var(--stone);font-size:18px">›</div>
+                     </div>
+                     <div style="display:flex;align-items:center;gap:8px;padding:10px 20px;border-top:1px solid var(--hairline-soft);background:var(--surface)">
+                     <span style="font-size:11px;color:var(--stone);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(shareUrl)}</span>
+                     <button onclick="event.stopPropagation();copyUrl('${esc(shareUrl)}')" class="btn btn-primary btn-sm">링크 복사</button>
+                     </div>
+                     </div>`;
+            }).join('');
+            render(`
+            <div class="list-header">
+            <h2>모임 목록</h2>
+            <button class="btn btn-primary btn-sm" onclick="location.hash='#create'">+ 새 모임</button>
             </div>
-            <div style="color:var(--stone);font-size:18px">›</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;padding:10px 20px;border-top:1px solid var(--hairline-soft);background:var(--surface)">
-            <span style="font-size:11px;color:var(--stone);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(shareUrl)}</span>
-            <button onclick="event.stopPropagation();copyUrl('${esc(shareUrl)}')" class="btn btn-primary btn-sm">링크 복사</button>
-          </div>
-        </div>`;
-      }).join('');
-    }
-    render(`
-      <div class="list-header">
-        <h2>모임 목록</h2>
-        <button class="btn btn-primary btn-sm" onclick="location.hash='#create'">+ 새 모임</button>
-      </div>
-      ${html}
-    `);
-  }, err => {
-    hideLoading();
-    render(`<div class="alert alert-warn">${err.message.includes('permission') ? 'Firebase 권한 오류 — Realtime Database 규칙을 테스트 모드로 설정하세요.' : '오류: ' + err.message}</div>`);
-  });
+            ${html}
+            `);
+     }).catch(err => { hideLoading(); render(`<div class="alert alert-warn">오류: ${err.message}</div>`); });
 }
 
 // ── Create ────────────────────────────────────────────────────
